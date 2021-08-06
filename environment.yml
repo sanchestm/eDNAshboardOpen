@@ -1,0 +1,29 @@
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.8
+  - scikit-optimize
+  - numpy
+  - ipywidgets
+  - scikit-learn
+  - hdbscan
+  - ipykernel
+  - lightgbm
+  - shap
+  - umap-learn
+  - seaborn
+  - dash-bootstrap-components
+  - pandas-profiling
+  - fiona
+  - ipywidgets
+  - matplotlib
+  - prophet
+  - pandas
+  - graphviz
+  - python-graphviz
+  - pip
+  - pip:
+    - keplergl
+    - jupyter-dash
+    - dash-cytoscape==0.2.0
