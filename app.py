@@ -1479,4 +1479,4 @@ def Generate_map(data, datau, umap_selelection):
     return html.Iframe(srcDoc = ret_map._repr_html_().decode(), height='1343', width='2380')#  height='1343', width='2380'
 
 if __name__ == '__main__':
-    app.run_server(mode='external', debug=True, host = "localhost" , dev_tools_ui=True, threaded=True)
+    app.run_server(mode='external', debug=True, host = '127.0.0.1', dev_tools_ui=True, threaded=True)
