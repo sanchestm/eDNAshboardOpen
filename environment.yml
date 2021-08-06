@@ -25,6 +25,7 @@ dependencies:
   - pip
   - pip:
     - keplergl
+    - jupyter-server-proxy
     - jupyter-dash
     - dash-cytoscape==0.2.0
     - gunicorn

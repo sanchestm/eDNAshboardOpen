@@ -1476,5 +1476,4 @@ def Generate_map(data, datau, umap_selelection):
     return html.Iframe(srcDoc = ret_map._repr_html_().decode(), height='1343', width='2380')#  height='1343', width='2380'
 
 if __name__ == '__main__':
-    app.run_server(mode='external', port = 8096, debug=True,   dev_tools_ui=True, threaded=True,  host = '127.0.0.1')
-    print('open this link in your web browser http://127.0.0.1:8096/ to open the application\npress crtl-c enter to quit')
+    app.run_server(mode='external', debug=True,   dev_tools_ui=True, threaded=True)
