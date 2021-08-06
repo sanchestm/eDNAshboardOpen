@@ -3,7 +3,7 @@ free dashboard for eDNA studies
 
 
 ### Try on binder
-####Cloud access: slower and might break with large files (504 error) 
+#### Cloud access: slower and might break with large files (504 error)
 
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/sanchestm/eDNAshboardOpen/HEAD)
 1. **Click on lauch binder link**
@@ -13,7 +13,7 @@ free dashboard for eDNA studies
 5. **click on the link output generated**
 
 ### Installing instruction
-####Local install: faster, can run large files
+#### Local install: faster, can run large files
 
 1. **Download Anaconda and RapID source code**
     1. [Dowload Ananconda](https://www.anaconda.com/products/individual) if not done before
