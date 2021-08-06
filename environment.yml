@@ -27,3 +27,4 @@ dependencies:
     - keplergl
     - jupyter-dash
     - dash-cytoscape==0.2.0
+    - gunicorn
