@@ -49,7 +49,7 @@ python app.py
 
 ### Rerunning the program
 
-To rerun the program once we closed it, we only have to reopen the terminal. Activate the RapID environment. Use the `cd` to navigate to the directory of the mainQT5.py file and the execute it using `python mainQT5.py`. Or run the following lines if the RapID source code is in Downloads:
+To rerun the program once we closed it, we only have to reopen the terminal. Activate the eDNAshboardOpen environment. Use the `cd` to navigate to the directory of the app.py file and the execute it using `python app.py`. Or run the following lines if the eDNAshboardOpen source code is in Downloads:
 ```
 conda activate eDNAshboardOpen
 cd Downloads\eDNAshboardOpen-master
