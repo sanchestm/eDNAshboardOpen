@@ -2,8 +2,6 @@
 free dashboard for eDNA studies
 
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/sanchestm/eDNAshboardOpen/HEAD)
-.. image:: https://mybinder.org/badge_logo.svg
- :target: https://mybinder.org/v2/gh/sanchestm/eDNAshboardOpen/HEAD
 
 
 
