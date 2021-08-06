@@ -116,7 +116,7 @@ import time
 import ipywidgets as widget
 import dash_html_components as html
 from sklearn.base import clone
-JupyterDash.infer_jupyter_proxy_config()
+#JupyterDash.infer_jupyter_proxy_config() un comment for binder use
 
 
 def _force_plot_htmlsm(*args):
@@ -530,7 +530,7 @@ def mpl2plotlyGraph(figure):
 
 # Build App
 app = JupyterDash(__name__, external_stylesheets=[dbc.themes.MINTY]) #FLATLY, LUMEN, SUPERHERO
-server = app.server
+#server = app.server  add this for binder
 
 
 def convert2cytoscapeJSON(G):
@@ -1479,4 +1479,4 @@ def Generate_map(data, datau, umap_selelection):
     return html.Iframe(srcDoc = ret_map._repr_html_().decode(), height='1343', width='2380')#  height='1343', width='2380'
 
 if __name__ == '__main__':
-    app.run_server(mode='external',host = "localhost", debug=True,   dev_tools_ui=True, threaded=True)
+    app.run_server(mode='external', debug=True, host = "localhost" , dev_tools_ui=True, threaded=True)
