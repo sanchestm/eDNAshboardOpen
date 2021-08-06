@@ -1,7 +1,16 @@
 # eDNAshboardOpen
 free dashboard for eDNA studies
 
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/sanchestm/eDNAshboardOpen/HEAD)
+.. image:: https://mybinder.org/badge_logo.svg
+ :target: https://mybinder.org/v2/gh/sanchestm/eDNAshboardOpen/HEAD
+
+
+
 ### Installing instruction
+
+try the binder logo or follow the link https://mybinder.org/v2/gh/sanchestm/eDNAshboardOpen/HEAD
+
 #### Dowload and unzip the eDNAsh manually or use git clone
 
 #### Download Anaconda if not done yet (https://www.anaconda.com/products/individual)
