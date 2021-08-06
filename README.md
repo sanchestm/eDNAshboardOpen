@@ -3,15 +3,17 @@ free dashboard for eDNA studies
 
 
 ### Try on binder
+####Cloud access: slower and might break with large files (504 error) 
 
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/sanchestm/eDNAshboardOpen/HEAD)
 1. **Click on lauch binder link**
-2. **wait until it opens jupyter**
-3. **double-click ednadashboardapp.ipynb**
-4. **run all cells by pressing the run button**
+2. **wait until it opens jupyter notebook**
+3. **Click in the ednadashboardapp.ipynb file**
+4. **run all cells by pressing Alt+Enter twice or pressing the run button twice**
 5. **click on the link output generated**
 
-### Installing instruction (local access)
+### Installing instruction
+####Local install: faster, can run large files
 
 1. **Download Anaconda and RapID source code**
     1. [Dowload Ananconda](https://www.anaconda.com/products/individual) if not done before
