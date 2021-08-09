@@ -25,7 +25,7 @@ free dashboard for eDNA studies
     3. **In Mac:** open terminal by searching `terminal` in Spotlight (or Finder). Open the terminal by clicking the terminal app
 3. In the terminal copy-paste and press enter for the following code
     1. `cd Downloads\eDNAshboardOpen-master`
-    2. `conda create env --name eDNAshboardOpen --file environment.yml`
+    2. `conda env create --name eDNAshboardOpen --file environment.yml`
 
 
 ### Run program
