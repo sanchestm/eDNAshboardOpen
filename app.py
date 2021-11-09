@@ -4,47 +4,60 @@ import sys
 #from PyQt5 import QtCore, QtGui, uic, QtWidgets
 #from PyQt5.QtWebEngineWidgets import *
 #from PyQt5.QtCore import QUrl
+
 import numpy as np
-from jupyter_dash import JupyterDash
 import pandas as pd
 from pandas.plotting import scatter_matrix
+from sklearn.base import is_classifier, is_regressor
 import matplotlib.pyplot as plt
 import matplotlib
-matplotlib.use('Agg')
-from sklearn import linear_model
+#matplotlib.style.use('seaborn')
 plt.rcParams["figure.figsize"] = (15,15)
 import math
 import seaborn as sns
 import shap
-#from datetime import datetime
+from datetime import datetime
 import time
 from ipywidgets.embed import embed_minimal_html
-from umap import UMAP
+import umap
 from pandas_profiling import ProfileReport
 from sklearn.neighbors import kneighbors_graph
 from prophet import Prophet
-import umap
-from lightgbm import LGBMRegressor,LGBMClassifier
-from sklearn.preprocessing import *
-from sklearn.decomposition import *
-from sklearn.manifold import *
+from umap import UMAP
+from lightgbm import LGBMRegressor,LGBMClassifier, plot_tree
+from sklearn.preprocessing import Binarizer,FunctionTransformer, KBinsDiscretizer, KernelCenterer, LabelBinarizer, LabelEncoder, MinMaxScaler,MaxAbsScaler,\
+                                  QuantileTransformer, Normalizer, OneHotEncoder, OrdinalEncoder,PowerTransformer, RobustScaler, SplineTransformer,StandardScaler, PolynomialFeatures
+from sklearn.decomposition import DictionaryLearning,FastICA, IncrementalPCA, KernelPCA, MiniBatchDictionaryLearning, MiniBatchSparsePCA, NMF,PCA,SparsePCA, FactorAnalysis,\
+                                  TruncatedSVD, LatentDirichletAllocation
+from sklearn.manifold import LocallyLinearEmbedding, Isomap, MDS, SpectralEmbedding, TSNE
 from sklearn.pipeline import make_pipeline
 from sklearn.utils import estimator_html_repr
-import sklearn
+#import sklearn
 from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer
-from sklearn.ensemble import *
-from sklearn.linear_model import *
+from sklearn.ensemble import  BaseEnsemble,RandomForestClassifier, RandomForestRegressor, RandomTreesEmbedding, ExtraTreesClassifier, ExtraTreesRegressor,\
+                          BaggingClassifier, BaggingRegressor, IsolationForest, GradientBoostingClassifier, GradientBoostingRegressor, AdaBoostClassifier,\
+                          AdaBoostRegressor, VotingClassifier, VotingRegressor, StackingClassifier, StackingRegressor, HistGradientBoostingClassifier,\
+                          HistGradientBoostingRegressor
+from sklearn.linear_model import BayesianRidge, ElasticNet, ElasticNetCV, Hinge, Huber, HuberRegressor, Lars, LarsCV, Lasso, LassoCV, LassoLars, LassoLarsCV, LassoLarsIC,\
+                             LinearRegression, Log, LogisticRegression, LogisticRegressionCV, ModifiedHuber,MultiTaskElasticNet, MultiTaskElasticNetCV, MultiTaskLasso,\
+                             MultiTaskLassoCV, OrthogonalMatchingPursuit, OrthogonalMatchingPursuitCV, PassiveAggressiveClassifier, PassiveAggressiveRegressor, Perceptron, \
+                             QuantileRegressor, Ridge, RidgeCV, RidgeClassifier, RidgeClassifierCV, SGDClassifier, SGDRegressor, SGDOneClassSVM, SquaredLoss,TheilSenRegressor, \
+                             RANSACRegressor, PoissonRegressor,GammaRegressor,TweedieRegressor
+from sklearn.naive_bayes import BernoulliNB, GaussianNB, MultinomialNB,ComplementNB, CategoricalNB
+from scipy.stats import ttest_ind, ttest_1samp
+from dash_table.Format import Format, Scheme, Trim
+from  plotly.offline  import plot_mpl
+import plotly.tools as ptools
 import networkx as nx
 from prophet.plot import plot_plotly, plot_components_plotly
 import calendar
 from prophet.utilities import regressor_coefficients
+#from time import strptime
 import plotly.express as px
-#from jupyter_dash import JupyterDash
-import dash_core_components as dcc
+from jupyter_dash import JupyterDash
 import dash_bootstrap_components as dbc
-import dash_html_components as html
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output# Load Data
 import base64
 import numpy as np
 import pandas as pd
@@ -52,8 +65,7 @@ from io import StringIO
 import io
 import dash
 from dash.dependencies import Input, Output, State
-import dash_html_components as html
-import dash_core_components as dcc
+from dash import html, dcc#, dash_table
 import dash_table
 import dash_cytoscape as cyto
 from dash.exceptions import PreventUpdate
@@ -62,157 +74,48 @@ import hdbscan
 import datetime
 from scipy.spatial import distance_matrix
 from sklearn.metrics.pairwise import euclidean_distances
-from scipy.stats import ttest_ind, ttest_1samp
-from dash_table.Format import Format, Scheme, Trim
+
 from sklearn.compose import make_column_transformer
-from ipywidgets import AppLayout, Button, Layout, Accordion
-from ipywidgets import Button, Layout, jslink, IntText, IntSlider, HBox, VBox
-from ipywidgets import GridspecLayout
-from sklearn.preprocessing import *
-from sklearn.decomposition import *
-from sklearn.manifold import *
 from sklearn.pipeline import make_pipeline
-from umap import UMAP
-from sklearn.ensemble import *
-from sklearn.linear_model import *
 from joblib import Memory
 from shutil import rmtree
-import sklearn
 from sklearn import svm, datasets
 from sklearn.metrics import auc,confusion_matrix,plot_confusion_matrix,classification_report
 from sklearn.metrics import plot_roc_curve
 from sklearn.model_selection import StratifiedKFold, KFold
 from sklearn.compose import ColumnTransformer
-from lightgbm import LGBMClassifier, LGBMRegressor
 from skopt import BayesSearchCV, gp_minimize, forest_minimize, gbrt_minimize
 from skopt.searchcv import BayesSearchCV as BSCV
 from skopt.space import Real, Categorical, Integer
 from sklearn.model_selection import train_test_split
-from sklearn.svm import SVC
 from sklearn import set_config
-from sklearn.ensemble import RandomForestClassifier as rf
-from sklearn.ensemble import ExtraTreesClassifier
 from sklearn.model_selection import cross_val_score, cross_validate, StratifiedKFold, KFold
 from skopt.plots import plot_objective
 from skopt.utils import use_named_args
 from skopt.plots import plot_convergence
 from sklearn.feature_selection import RFECV
-from lightgbm import LGBMRegressor
-from lightgbm import LGBMClassifier
-from sklearn.preprocessing import StandardScaler
 set_config(display='diagram')
-import numpy as np
-import pandas as pd
 from pandas.plotting import scatter_matrix
 import matplotlib.pyplot as plt
 import matplotlib
-#matplotlib.style.use('seaborn')
-from sklearn import linear_model
-import math
-import seaborn as sns
-import shap
-#from datetime import datetime
-import time
 import ipywidgets as widget
-import dash_html_components as html
 from sklearn.base import clone
-#JupyterDash.infer_jupyter_proxy_config() un comment for binder use
-
-
-def _force_plot_htmlsm(*args):
-    force_plot = shap.force_plot(*args, matplotlib=False)
-    shap_html = f"<head>{shap.getjs()}</head><body>{force_plot.html()}</body>"
-    return html.Iframe(srcDoc=shap_html,style={"width": "100%", "height": "400px", "border": 0})
-
-
-#### things to add : memory managment
-#### add n_jobs = -1 for everything
-#### add featureUnion
+import plotly.figure_factory as ff
 
 class pipemaker2:
     def __init__(self, df,ipt_pipe, target ,*, height = 'auto', width = 'auto'):
         self.pipe_list = []
-
-        ###### Dataframe!
         self.df = df
-
-
-
-        ###### App
-        self.target = widget.Select(options = list(self.df.columns), description = 'Target',rows=1 ,layout=Layout(height='auto', width='33%'))
-        self.target.value = target
         self.TG = target
-        self.classifier = widget.Select(options = ['LGBMClassifier', 'LGBMRegressor'] + sklearn.ensemble.__all__ + sklearn.linear_model.__all__, description = 'Classifier',rows=1, layout=Layout(height='auto', width='33%'))
-
-
-        #### add column buttons
-        self.nColumns = widget.BoundedIntText( value=1,min=1,step=1,description='Number of column transformers:' ,layout=Layout(height='auto', width='33%'))
-        self.nColumns.observe(self.maketab, "value")
-
-        self.top_box = HBox([self.nColumns, self.target, self.classifier],layout=Layout(height='auto', width='100%'))
-
-        self.acc_list = [self.makeacc()]
         self.check = 0
-
-        self.tab = widget.Tab()
-        self.tab.set_title(0, '0')
-        self.tab.children = self.acc_list
-        self.widget = VBox([self.top_box, self.tab])
-
         self.cached_pipe = 0
         self.location = 0
         self.memory = 0
         self.optimized_pipe = (0, 0)
         self.input_pipe = ipt_pipe
 
-
-    def makeacc(self):
-        accordion = widget.Accordion(children=[
-            widget.Text(str(self.nColumns.value)),
-            widget.SelectMultiple(options=self.df.columns.values, description='columns',rows=len(self.df.columns)),
-            widget.Text(''),
-            widget.ToggleButtons(options= ['None'] + [x for x in sklearn.preprocessing.__all__ if x[0].isupper() ]  ),
-            widget.ToggleButtons(options= ['None'] +  [x for x in sklearn.decomposition.__all__ if x[0].isupper() ]  ),
-            widget.ToggleButtons(options= ['None', 'UMAP'] + [x for x in sklearn.manifold.__all__ if x[0].isupper() ] )
-        ])
-        accordion.set_title(0, 'Name of transformer')
-        accordion.set_title(1, 'Column to be transformed')
-        accordion.set_title(2, 'Manual input')
-        accordion.set_title(3, 'Sklearn preprocessing')
-        accordion.set_title(4, 'Sklearn decomposition')
-        accordion.set_title(5, 'Sklearn manifold')
-        accordion.selected_index = None
-        return accordion
-
-
-    def accordion_to_tuple(self, acc):
-
-        if acc.children[-4].value == '': transformer_list = [eval(x.value + '()') for x in acc.children[-3:] if x.value !='None' ]
-        else: transformer_list = eval('[' + acc.children[-4].value+ ']')
-
-        if len(transformer_list) > 0: pipe = make_pipeline( *transformer_list)
-        else: pipe = Pipeline(steps = [('empty','passthrough')])
-
-        self.check = (acc.children[0].value, pipe, tuple(acc.children[1].value))
-
-        return (acc.children[0].value, pipe,tuple(acc.children[1].value))
-
-
-    def maketab(self, change):
-        if self.nColumns.value > len(self.acc_list):
-             self.acc_list += [self.makeacc() for i in range(self.nColumns.value - len(self.acc_list))]
-
-        elif self.nColumns.value < len(self.acc_list):
-            self.acc_list = self.acc_list[:self.nColumns.value]
-
-
-        self.tab.children = self.acc_list
-        for num, acc in enumerate(self.acc_list):
-            self.tab.set_title(num, str(acc.children[0].value))
-        self.widget = VBox([self.top_box, self.tab])
-
     def Pipe(self):
-        return clone(self.input_pipe) #Pipeline(steps = [('preprocessing', self.ColumnTransform()), ('classifier', eval(self.classifier.value + '()') )])
+        return clone(self.input_pipe)
 
     def Cache_pipe(self):
         self.location = 'cachedir'
@@ -223,13 +126,6 @@ class pipemaker2:
         self.memory.clear(warn=True)
         rmtree(self.location)
         del self.memory
-
-    def display_app(self):
-        display(self.widget)
-
-    def ColumnTransform(self):
-        return ColumnTransformer([self.accordion_to_tuple(aco) for aco in self.acc_list])
-
 
     def export_kwards(self):
         return self.Pipe().get_params()
@@ -257,7 +153,6 @@ class pipemaker2:
         plt.ylabel("Cross validation score (nb of correct classifications)")
         plt.plot(hX, hY)
         plt.show()
-
         return pd.DataFrame([selector.ranking_, selector.support_], columns = preprocessed_df.columns, index = ['Ranking', 'support'])
 
     def make_skpot_var(self, param, temperature = 3, distribution = 'uniform', just_classifier = False): #'log-uniform'
@@ -282,8 +177,6 @@ class pipemaker2:
             if lower_bondary < 2: lower_bondary = 2
             upper_bondary = value*temperature + lower_bondary
             return Real(lower_bondary, upper_bondary, distribution ,name = name)
-
-
 
     def skopt_classifier_space(self, just_classifier = False):
         dic = self.export_kwards()
@@ -351,14 +244,11 @@ class pipemaker2:
 
         return {'result': result, 'best_params':best_params}
 
-
-
     def get_params(self, result_object, space):
         try:
             return { i.name: result_object.x[num] for  num, i in enumerate(space) }
         except:
             raise
-
 
     def Vis_Cluster(self, method):
         transformed = self.Pipe()['preprocessing'].fit_transform(self.df)
@@ -431,7 +321,8 @@ class pipemaker2:
             if self.optimized_pipe[1] == 0: clf = self.Pipe()
             else: clf = self.optimized_pipe[0]
             report = cross_validate(clf, X, y, cv=5,  scoring=('neg_mean_absolute_percentage_error','r2','explained_variance', 'max_error', 'neg_mean_absolute_error', 'neg_mean_squared_error'))
-            fig, ax = plt.subplots(1, 1, figsize = (1,1))
+            fig, ax = plt.subplots(1, 1, figsize = (10,10))
+            fig.tight_layout()
         return report, fig
 
     def named_preprocessor(self):
@@ -455,15 +346,7 @@ class pipemaker2:
         shap_values = explainer.shap_values(dat_trans)
 
         #### force-plot
-        a = [_force_plot_htmlsm(explainer.expected_value[i], shap_values[i], dat_trans) for i in len(shap_values)]
-
-        #### heatmap
-        #try: hmap = shap.TreeExplainer(clf['classifier'].fit(dat_trans, self.df[self.TG]), dat_trans) #redo check additivity
-        #except:
-        #    print('Failed in heatmap, using LGBMC instead')
-        #    hmap = shap.TreeExplainer(LGBMClassifier().fit(dat_trans, self.df[self.TG]), dat_trans)
-        #fig, ax = plt.subplots(1,1, figsize=(15, 15))
-        #shap.plots.heatmap(hmap(dat_trans)) ### figure is fig
+        a = [_force_plot_html(explainer.expected_value[i], shap_values[i], dat_trans) for i in len(shap_values)]
 
         ### dependence matrix
         ivalues = explainer.shap_interaction_values(dat_trans)
@@ -472,13 +355,9 @@ class pipemaker2:
         for i in d.keys():
             for j in d.keys():
                 shap.dependence_plot((d[i], d[j]), ivalues[1], dat_trans, ax = axdm[i,j], show = False)
+        return (a,  figdm)
 
-        ### dependence plots
-        #figdp, axdp = plt.subplots( len(dat_trans.columns)//4+1, 4, figsize=(15, 15))
-        #for num, col in enumerate(dat_trans.columns):
-        #    shap.dependence_plot(col, shap_values[1], dat_trans, ax = axdp[num//4,num%4], show= False)
-        return (a,  figdm) #fig,
-
+#JupyterDash.infer_jupyter_proxy_config()
 
 cyto.load_extra_layouts()
 height, width = [500,500]
@@ -530,7 +409,6 @@ def mpl2plotlyGraph(figure):
 
 # Build App
 app = JupyterDash(__name__, external_stylesheets=[dbc.themes.MINTY]) #FLATLY, LUMEN, SUPERHERO
-#server = app.server  add this for binder
 
 
 def convert2cytoscapeJSON(G):
@@ -556,85 +434,89 @@ def convert2cytoscapeJSON(G):
 
 
 upload_tab = [
-    dbc.Row(dbc.Col(dbc.Jumbotron([
-        html.H1("qPCR files", className="display-3"),
+    dbc.Row(dbc.Col(dbc.Container([
+        html.H3("Send complete dataset directly", className="display-4"),
+        dcc.Upload(id='upload_dataset_directly',children=html.Div(['Drag and Drop or ', html.A('Select Files')]),
+        style={'width': '100%', 'height': '80px',  'lineHeight': '80px', 'font-size': '20px',   'borderWidth': '1px', 'borderStyle': 'dashed',  'borderRadius': '5px',   'textAlign': 'center', 'margin': '10px'},multiple=False),
+        html.Div(id='direct_dataframe_upload_name')
+    ],className="h-100 p-5 bg-light border rounded-4 g-0"), width = 12), justify="center",className="h-100 p-5 bg-light border rounded-4 g-0 gap-2"),
+
+    dbc.Row(dbc.Col(dbc.Container([
+        html.H4("Send qPCR files and metadata", className="display-4"),
+        html.H4("qPCR files", className="display-5"),
         html.P('We are expecting csv files from an export file from a cfx96',className="lead",),
         html.Hr(className="my-2"),
         dbc.Row([
-        dbc.Col(html.H4("Column of qPCR files to merge with habitat metadata:") , width = 4),
+        dbc.Col(html.H5("Column of qPCR files to merge with habitat metadata:") , width = 4),
         dbc.Col(dcc.Dropdown(options = [{"label": "Sample", "value": 'Sample'}] , value = 'Sample', id='qpcrdf', disabled = True), width = 3)]),
         dcc.Upload(id='upload-qPCR2',children=html.Div(['Drag and Drop or ', html.A('Select Files')]),
             style={'width': '100%',
-                'height': '120px',
-                'lineHeight': '120px',
-                'borderWidth': '2px',
+                'height': '80px',
+                'lineHeight': '80px',
+                'borderWidth': '1px',
                 'borderStyle': 'dashed',
                 'font-size': '20px',
                 'borderRadius': '5px',
                 'justify-content': 'center',
                 'textAlign': 'center',
                 'margin': '10px'}, multiple=True),
-        html.Div(id='qpcr-data-upload')  ]), width = 12),justify="center",no_gutters=True),
-    dbc.Row(dbc.Col(dbc.Jumbotron([
-        html.H1("Habitat metadata", className="display-3"),
+        html.Div(id='qpcr-data-upload'),
+        html.H4("Habitat metadata", className="display-5"),
         html.P('You probably have a separate file with Lat, Lon and other environmental parameters',className="lead",),
         html.Hr(className="my-2"),
         dbc.Row([
-        dbc.Col(html.H4("Column of Habitat metadata file to merge with qPCRs:") , width = 4),
+        dbc.Col(html.H5("Column of Habitat metadata file to merge with qPCRs:") , width = 4),
         dbc.Col(dcc.Dropdown(id='habitatdf'), width = 3)]),
         dcc.Upload(id='upload-habitat',children=html.Div(['Drag and Drop or ', html.A('Select Files')]),
             style={'width': '100%',
-                'height': '120px',
-                'lineHeight': '120px',
-                'borderWidth': '2px',
+                'height': '80px',
+                'lineHeight': '80px',
+                'borderWidth': '1px',
                 'borderStyle': 'dashed',
                 'borderRadius': '5px',
                 'font-size': '20px',
                 'justify-content': 'center',
                 'textAlign': 'center',
                 'margin': '10px'},multiple=True),
-        html.Div(id='habitat-data-upload') ]), width = 12),justify="center",no_gutters=True),
+        html.Div(id='habitat-data-upload')
+    ],className="h-100 p-5 bg-light border-2 rounded-2 g-0"),width = 12),justify="center",className="h-100 p-5 bg-light border rounded-4 g-0 gap-2"),
+    #dbc.Row(dbc.Col(dbc.Container([],className="h-100 p-5 bg-light rounded-2 g-0", fluid = True), width = 11),justify="center",className="g-0")
 
-    dbc.Row(dbc.Col(dbc.Jumbotron([
-        html.H1("Send complete dataset directly", className="display-3"),
-        dcc.Upload(id='upload_dataset_directly',children=html.Div(['Drag and Drop or ', html.A('Select Files')]),
-        style={'width': '100%', 'height': '120px',  'lineHeight': '120px', 'font-size': '20px',   'borderWidth': '2px', 'borderStyle': 'dashed',  'borderRadius': '5px',   'textAlign': 'center', 'margin': '10px'},multiple=False),
-        html.Div(id='direct_dataframe_upload_name')
-    ]), width = 12),justify="center",no_gutters=True)
+
 ]
 
 merge_tab = [
-    dbc.Jumbotron([
-        html.H1("Merged dataset overview ", className="display-3"),
-        html.P('Look for parameters that have unexpected behavior, dataset size and other possible concerns with data integrity',className="lead",),
+    dbc.Container([
+        html.H2("Dataset overview ", className="display-4"),
+        #html.P('Look for parameters that have unexpected behavior, dataset size and other possible concerns with data integrity',className="lead",),
         html.Hr(className="my-2"),html.P(""),
-        dcc.Loading(id="loading-1",type="default", children=html.Div(id='Merged_df', style = {'justify-content': 'center', 'margin': '0 auto', 'width': '90%'} ) )
-    ]),
+        dcc.Loading(id="loading-1",type="default", children=html.Div(id='Merged_df', style = {'justify-content': 'center', 'margin': '0 auto', 'width': '95%'} ) )
+    ],className="h-100 p-5 bg-light border rounded-3 g-0", fluid = True),
 ]
 
 
-VIS = [dbc.Row(dbc.Col(html.Div( id = 'keplermap', style = {'overflow': 'hidden'}), width="100%",style = {'overflow': 'clip'}), no_gutters=True,justify="center", style = {'overflow': 'hidden'}),]
+VIS = [dbc.Row(dbc.Col(html.Div( id = 'keplermap', style = {'overflow': 'hidden'}), width="100%",style = {'overflow': 'clip'}), className="g-0",justify="center", style = {'overflow': 'hidden'}),]
 kep_tab=[ dbc.Row([
            dbc.Col(
                [dbc.Row([
-                   dbc.Jumbotron([
-                       html.H4("what are the continous columns for the UMAP?", id = 'kep_tab_continuous_columns_target'),
+                   dbc.Container([
+                       html.H5("what are the continous columns for the UMAP?", id = 'kep_tab_continuous_columns_target'),
                        dbc.Popover([ dbc.PopoverHeader("how we look at continuous data"),dbc.PopoverBody("https://umap-learn.readthedocs.io/en/latest/basic_usage.html")],target="kep_tab_continuous_columns_target",trigger="hover",),
                        dcc.Dropdown(options=[],value=[], multi=True, id = 'UMAP_cont'),
-                       html.H4("what are the categorical columns for the UMAP?", id = 'kep_tab_cat_columns_target'),
+                       html.H5("what are the categorical columns for the UMAP?", id = 'kep_tab_cat_columns_target'),
                        dbc.Popover([ dbc.PopoverHeader("how we look at categorical data"),dbc.PopoverBody("see https://umap-learn.readthedocs.io/en/latest/composing_models.html#diamonds-dataset-example")],target="kep_tab_cat_columns_target",trigger="hover",),
                        dcc.Dropdown(options=[],value=[], multi=True, id = 'UMAP_cat'),
-                       html.H4("Do you want to fit the UMAP to a feature?", id = 'keep_tab_metric_learn'), #https://umap-learn.readthedocs.io/en/latest/supervised.html
+                       html.H5("Do you want to fit the UMAP to a feature?", id = 'keep_tab_metric_learn'), #https://umap-learn.readthedocs.io/en/latest/supervised.html
                        dbc.Popover([ dbc.PopoverHeader("fitting umap to feature"),dbc.PopoverBody("https://umap-learn.readthedocs.io/en/latest/supervised.html")],target="keep_tab_metric_learn",trigger="hover",),
                        dcc.Dropdown(options=[],value=[], multi=False, id = 'UMAP_y'),
-                       html.H4("How many neighboors for the UMAP to use?", id = 'keep_tab_nneighboors'),
+                       html.H5("How many neighboors for the UMAP to use?", id = 'keep_tab_nneighboors'),
                        dbc.Popover([ dbc.PopoverHeader("n neighboors parameter"),dbc.PopoverBody("This parameter controls how UMAP balances local versus global structure in the data. It does this by \
                        constraining the size of the local neighborhood UMAP will look at when attempting to learn the manifold structure of the data. \
                        This means that low values of n_neighbors will force UMAP to concentrate on very local structure (potentially to the detriment of the big picture),\
                        while large values will push UMAP to look at larger neighborhoods of each point when estimating the manifold structure of the data, \
                        losing fine detail structure for the sake of getting the broader of the data. _ see https://umap-learn.readthedocs.io/en/latest/parameters.html#n-neighbors")],target="keep_tab_nneighboors",trigger="hover",),
                        dbc.Input(id="n_neighboors", type="number", value = 15, min = 10, max = 1000), #https://umap-learn.readthedocs.io/en/latest/parameters.html#n-neighbors
-                       html.H4('Type of scaling to use:', id= 'kep_tab_scale'),
+                       html.H5('Type of scaling to use:', id= 'kep_tab_scale'),
                        dbc.Popover([ dbc.PopoverHeader("Should I scale my data?"),dbc.PopoverBody("The default answer is yes, but, of course, the real answer is “it depends”. \
                        If your features have meaningful relationships with one another (say, latitude and longitude values) then normalising per feature is not a good idea. \
                        For features that are essentially independent it does make sense to get all the features on (relatively) the same scale. \
@@ -645,146 +527,165 @@ kep_tab=[ dbc.Row([
                             {"label": "No Standardization", "value": 1},
                             {"label": "Standard scaler", "value": 2},
                             {"label": "Pipeline from machine learning tab","value": 3}],value = 2,
-                            labelCheckedStyle={"color": "#223c4f", 'font-size': '18px'},
-                            labelStyle = {}, style = {'font-size': '18px', 'margin' : '10px', 'margin-left': '60px' ,'transform':'scale(1.2)'}, switch=True,
+                            labelCheckedStyle={"color": "#223c4f", 'font-size': '14px'},
+                            labelStyle = {}, style = {'font-size': '14px', 'margin' : '8px', 'margin-left': '20px' ,'transform':'scale(1.1)'}, switch=True,
                             inputStyle = { }
                                      ),
-                      dbc.Button("Generate UMAP", color="info", size = 'lg', className="mr-1", block=True, id='UMAP_start') ]),
+                      dbc.Button("Generate UMAP", color="info", size = 'lg', className="d-grid gap-2", id='UMAP_start') ],className="h-100 p-5 bg-light border rounded-3 g-0 d-grid", fluid = True),
                       dbc.Popover([ dbc.PopoverHeader("what is UMAP?"),dbc.PopoverBody("see https://umap-learn.readthedocs.io/en/latest/how_umap_works.html \nhttps://umap-learn.readthedocs.io/en/latest/scientific_papers.html\nhttps://umap-learn.readthedocs.io/en/latest/faq.html#what-is-the-difference-between-pca-umap-vaes")],target="UMAP_start",trigger="hover",),
 
 
                ])],width=2)  ,
            dbc.Col([dcc.Loading(id="loading-umap",type="default", children= dcc.Tabs([
-               dcc.Tab(label = 'umap-view', children = [html.Div(dcc.Graph(id='UMAP_view'), style = {'height': '1200px', 'width' : '1500px','margin-left':'30px'}),html.Div( id = 'umap_selected_stats', style = {'width': '98%'})] ),
+               dcc.Tab(label = 'umap-view', children = [html.Div(dcc.Graph(id='UMAP_view'), style = {'height': '1000px', 'width' : '1500px','margin-left':'30px'}),html.Div( id = 'umap_selected_stats', style = {'width': '98%'})] ),
                dcc.Tab(label = 'heatmap/cytoscape', children = html.Div( id = 'cytoscape', style = {'justify-content': 'center'} )),
                dcc.Tab(label = 'hdbscan clustering', children = html.Div(id='graph') ),
 
-           ], style = {'justify-content': 'center', 'width': '100%','margin-left': '12px','overflow': 'clip'})) ], width=10, style = {'overflow': 'clip'})],  no_gutters=True)] #
+           ], style = {'justify-content': 'center','display': 'flex' ,'width': '100%','margin-left': '12px','overflow': 'clip'})) ], width=10, style = {'overflow': 'clip'})],  className="g-0")] #
 
-#className="nav nav-pills"      , no_gutters=True         autosize=False
+#className="nav nav-pills"      , className="g-0"         autosize=False
 
 time_series_tab = [
     dbc.Row([
-        dbc.Col( dbc.Jumbotron([
-            html.H4("Target column"),
+        dbc.Col( dbc.Container([
+            html.H5("Target column"),
             dcc.Dropdown(options=[],value=[], multi=False, id = 'prophet_y'),
-            html.H4("Datetime column"),
+            html.H5("Datetime column"),
             dcc.Dropdown(options=[],value=[], multi=False, id = 'prophet_ds'),
-            html.Hr(style= {'margin-bottom': '25px'}),
-            html.H4("Additional regressors"),
+            html.Hr(style= {'margin-bottom': '3px'}),
+            html.H5("Additional regressors"),
             dcc.Dropdown(options=[],value=[], multi=True, id = 'prophet_regressors'),
-            html.Hr(style= {'margin-bottom': '25px'}),
-            html.H4('Rolling average'),
-            html.H5('number of days'),
+            html.Hr(style= {'margin-bottom': '3px'}),
+            html.H5('Rolling average'),
+            html.H6('number of days'),
             dbc.Input(id="prophet_rolling_average", type="number", value = 0, min = 0, max = 366, step = 0.25),
-            html.Hr(style= {'margin-bottom': '25px'}),
-            html.H4("Growth"),
+            html.Hr(style= {'margin-bottom': '3px'}),
+            html.H5("Growth"),
             dcc.Dropdown(options=[
                 {"label": "logistic", "value": 'logistic'},
                 {"label": "flat", "value": 'flat'},
                 {"label": "linear", "value": 'linear'}
             ],value='linear', multi=False,id = 'prophet_growth'),
-            html.H4("Target maximum value"),
+            html.H5("Target maximum value"),
             dbc.Input(id="prophet_cap", type="number", value = 1, step = .01),
-            html.H4("Target minimum value"),
+            html.H5("Target minimum value"),
             dbc.Input(id="prophet_floor", type="number", value = 0, step = .01),
-            html.Hr(style= {'margin-bottom': '25px'}),
-            html.H4('Seasonnality'),
-            html.H5('frequency'),
+            html.Hr(style= {'margin-bottom': '3px'}),
+            html.H5('Seasonnality'),
+            html.H6('frequency'),
             dbc.Checklist( options = [
                 {"label": "Yearly", "value": 'yearly_seasonality'},
                 {"label": "Weekly", "value": 'weekly_seasonality'},
                 {"label": "Daily", "value": 'daily_seasonality'},
             ]  ,value=['yearly_seasonality'], id = 'prophet_seasonality' ,
-                          style = {'font-size': '18px', 'margin' : '10px', 'margin-left': '60px' ,'transform':'scale(1.2)'}, switch=True ),
-            html.H5('mode'),
+                          style = {'font-size': '14px', 'margin' : '2px', 'margin-left': '20px' ,'transform':'scale(1.)'}, switch=True),
+            html.H6('mode'),
             dcc.Dropdown(options=[
                 {"label": "additive", "value": 'additive'},
                 {"label": "multiplicative", "value": 'multiplicative'}
             ], multi=False,id = 'seasonality_mode', value = 'additive'),
-            html.H5('scale'),
+            html.H6('scale'),
             dbc.Input(id="season_prior", type="number", value = 10, min = 1, max = 100),
-            html.Hr(style= {'margin-bottom': '25px'}),
-            html.H4('Change points'),
-            html.H5('quantity'),
+            html.Hr(style= {'margin-bottom': '3px'}),
+            html.H5('Change points'),
+            html.H6('quantity'),
             dbc.Input(id="prophet_n_change_points", type="number", value = 25, min = 0, max = 100,step =1),
-            html.H5('scale'),
+            html.H6('scale'),
             dbc.Input(id="changepoint_prior", type="number", value = .05, min = 0, max = 10., step = 0.01),
-            html.H5('range'),
+            html.H6('range'),
             dbc.Input(id="changepoint_range", type="number", value = .8, min = 0.1, max = 1., step = 0.01),
 
 
 
 
-        ]), width = 2),
+        ],className="h-100 p-5 bg-light border rounded-3 g-0", fluid = True), width = 2),
         dbc.Col(dcc.Loading(id="loading-prophet",type="default", children=html.Div(id='prophet_plots', style = {'justify-content': 'center', 'margin': '0 auto', 'width': '100%'} ), style= {'margin-top': '100px'})),
-        dbc.Col( dbc.Jumbotron([
-            html.H4('Forecast'),
-            html.H5('prediction range'),
+        dbc.Col( dbc.Container([
+            html.H5('Forecast'),
+            html.H6('prediction range'),
             dcc.DatePickerRange(id= 'prophet_future_dates', display_format='MMM DD YYYY'),
             html.Hr(style= {'margin-bottom': '50px'}),
-            html.H5('remove these month'),
+            html.H6('remove these month'),
             dcc.Dropdown(options=[ {"label":  calendar.month_name[num], "value": num} for num in range(1,12)],value=[], multi=True,id = 'prophet_remove_months'),
-            html.H5('remove these days of the week'),
+            html.H6('remove these days of the week'),
             dcc.Dropdown(options=[ {"label":  day_name, "value": num} for num,day_name in enumerate(['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'])],
                          value=[], multi=True,id = 'prophet_remove_days_of_the_week'),
-            html.H5('remove these hours of the day'),
+            html.H6('remove these hours of the day'),
             dcc.Dropdown(options=[ {"label":  str(num)+':00-'+str(num+1)+':00', "value": num} for num in range(0,24)],value=[], multi=True,id = 'prophet_remove_hours'),
-            html.Hr(style= {'margin-bottom': '70px'}),
-            dbc.Button("Run forecast", color="info", size = 'lg', className="mr-1", block=True, id='run_prophet')
-        ]) , width = 2)
+            html.Hr(style= {'margin-bottom': '50px'}),
+            dbc.Button("Run forecast", color="info", size = 'lg', id='run_prophet')
+        ],className="h-100 p-5 bg-light border rounded-3 g-0", fluid = True), className="g-0", width = 2)
 
 
-    ], no_gutters=True, style={'margin-bottom': '10px'})
+    ], className="g-0", style={'margin-bottom': '10px'})
 
 
 ]
 
 
+sklearn_preprocessor_list = ['Binarizer','FunctionTransformer', 'KBinsDiscretizer', 'KernelCenterer', 'LabelBinarizer', 'LabelEncoder', 'MinMaxScaler',
+                             'MaxAbsScaler','QuantileTransformer', 'Normalizer', 'OneHotEncoder', 'OrdinalEncoder', 'PowerTransformer', 'RobustScaler', 'SplineTransformer',
+                              'StandardScaler', 'PolynomialFeatures']
+sklearn_decomposition_list = ['DictionaryLearning','FastICA', 'IncrementalPCA', 'KernelPCA', 'MiniBatchDictionaryLearning', 'MiniBatchSparsePCA',
+                              'NMF','PCA','SparsePCA', 'FactorAnalysis','TruncatedSVD', 'LatentDirichletAllocation']
+sklearn_manifold_list = ['LocallyLinearEmbedding', 'Isomap', 'MDS', 'SpectralEmbedding', 'TSNE']
+transformers = sklearn_preprocessor_list + sklearn_decomposition_list + sklearn_manifold_list + ['UMAP', 'passthrough']
+transformer_options = [ {'label': x, 'value': x } for x in  transformers]
 
+sklearn_ensemble_list  = ['BaseEnsemble','RandomForestClassifier', 'RandomForestRegressor', 'RandomTreesEmbedding', 'ExtraTreesClassifier', 'ExtraTreesRegressor',
+                          'BaggingClassifier', 'BaggingRegressor', 'IsolationForest', 'GradientBoostingClassifier', 'GradientBoostingRegressor', 'AdaBoostClassifier',
+                          'AdaBoostRegressor', 'VotingClassifier', 'VotingRegressor', 'StackingClassifier', 'StackingRegressor', 'HistGradientBoostingClassifier',
+                          'HistGradientBoostingRegressor']
+sklearn_linear_model_list = ['ARDRegression', 'BayesianRidge', 'ElasticNet', 'ElasticNetCV', 'Hinge', 'Huber', 'HuberRegressor', 'Lars', 'LarsCV', 'Lasso', 'LassoCV',
+                             'LassoLars', 'LassoLarsCV', 'LassoLarsIC', 'LinearRegression', 'Log', 'LogisticRegression', 'LogisticRegressionCV', 'ModifiedHuber',
+                             'MultiTaskElasticNet', 'MultiTaskElasticNetCV', 'MultiTaskLasso', 'MultiTaskLassoCV', 'OrthogonalMatchingPursuit', 'OrthogonalMatchingPursuitCV',
+                             'PassiveAggressiveClassifier', 'PassiveAggressiveRegressor', 'Perceptron', 'QuantileRegressor', 'Ridge', 'RidgeCV', 'RidgeClassifier',
+                             'RidgeClassifierCV', 'SGDClassifier', 'SGDRegressor', 'SGDOneClassSVM', 'SquaredLoss', 'TheilSenRegressor',
+                            'RANSACRegressor', 'PoissonRegressor', 'GammaRegressor', 'TweedieRegressor']
+sklearn_naive_bayes_list = ['BernoulliNB', 'GaussianNB', 'MultinomialNB', 'ComplementNB', 'CategoricalNB']
+classifier_list = ['LGBMClassifier', 'LGBMRegressor'] + sklearn_ensemble_list + sklearn_naive_bayes_list + sklearn_linear_model_list
+classifier_options = [ {'label': x, 'value': x } for x in  classifier_list]
 
-transformers = [x for x in sklearn.preprocessing.__all__ + ['UMAP'] + sklearn.decomposition.__all__ + sklearn.manifold.__all__  if x[0].isupper() and x != 'SparseCoder'] + ['passthrough']
-transformer_options = [ {'label': x, 'value': x } for x in  transformers] # eval(x+ '()')
 
 ML_tab = [
    dbc.Row([
        dbc.Col(
-           [dbc.Jumbotron([
+           [dbc.Container([
                 dbc.Row([
-                   dbc.Col([ html.H4("number of transformers:")]),
+                   dbc.Col([ html.H5("number of transformers:")]),
                    dbc.Col([#dcc.Dropdown(options=[ {'label': str(x), 'value': str(x)} for x in range(10)],value='2', multi=False,clearable=False, id = 'n_tabs')
-                            dbc.Input(id="n_tabs", type="number", value = 2, min = 1, max = 10)
+                            dbc.Input(id="n_tabs", type="number", value = 1, min = 1, max = 10)
                            ]),
-                   dbc.Col([html.H4("Target:")]),
+                   dbc.Col([html.H5("Target:")]),
                    dbc.Col([dcc.Dropdown(options=[],value=[], multi=False, id = 'ML_target',clearable=False)]),
-                   dbc.Col([html.H4("Classifier:", id = 'ml_tab_classifier'), dbc.Popover([ dbc.PopoverHeader("chosing a classifier"),dbc.PopoverBody('see: \
+                   dbc.Col([html.H5("Classifier:", id = 'ml_tab_classifier'), dbc.Popover([ dbc.PopoverHeader("chosing a classifier"),dbc.PopoverBody('see: \
                    https://scikit-learn.org/stable/supervised_learning.html#supervised-learning\n https://lightgbm.readthedocs.io/en/latest/Quick-Start.html ')],target="ml_tab_classifier",trigger="hover",)]),
-                   dbc.Col([dcc.Dropdown(options=[ {'label': x, 'value': x} for x in  ['LGBMClassifier', 'LGBMRegressor']  + sklearn.ensemble.__all__ + sklearn.linear_model.__all__]
-                               ,value = 'RandomForestClassifier',  multi=False, id = 'clf_disp', clearable=False)]) ])]),
-            dbc.Jumbotron([dbc.Row([dbc.Col(
-                   [html.H4("Columns to be transformed:")] +
+                   dbc.Col([dcc.Dropdown(options=classifier_options ,value = 'LGBMClassifier',  multi=False, id = 'clf_disp', clearable=False)]) ]), #)],className="h-100 p-5 bg-light border rounded-3 g-0", fluid = True),
+            dbc.Row([dbc.Col(
+                   [html.H5("Columns to be transformed:")] +
                    [ dcc.Dropdown(options= ['0'], value = ['0'],multi=True,clearable=False, id = 'Columns_'+ str(i))  for i in range(3)], id = 'preprocessing_columns'),
             dbc.Col(
-                   [html.H4("Column transformers:", id = 'ml_tab_column_trans')] + #https://scikit-learn.org/stable/modules/preprocessing.html#
+                   [html.H5("Column transformers:", id = 'ml_tab_column_trans')] + #https://scikit-learn.org/stable/modules/preprocessing.html#
                    [ dcc.Dropdown(options= transformer_options, value = ['passthrough'], multi=True,clearable=False, id = 'ColumnTransformer_'+ str(i))  for i in range(3)], id = 'preprocessing_functions'),
             dbc.Popover([ dbc.PopoverHeader("preprocessing the data"),dbc.PopoverBody("see:\n https://scikit-learn.org/stable/modules/preprocessing.html\n\
                    https://scikit-learn.org/stable/modules/decomposition.html#decompositions#\nhttps://scikit-learn.org/stable/modules/clustering.html#clustering")],target="ml_tab_column_trans",trigger="hover",)
-                                   ])])
+                                   ])],className="h-100 p-5 bg-light border rounded-1 g-0",fluid = True)
 
 
-           ],width=6, id='ml_user_input'), ] + [dbc.Col([dbc.Button("Update Pipeline", color="info", size = 'lg', className="mr-1", block=True, id='submit_pipe'),
-                                                         html.Div(id = 'show_pipeline', style ={'width': '50%','borderWidth': '0px' ,'border': 'white'})], width = 6)], no_gutters=True,justify="center"),
+           ],width=6, id='ml_user_input') ] + [dbc.Col([dbc.Button("Update Pipeline", color="info", size = 'lg', className="d-grid gap-2", id='submit_pipe'),
+                                                         html.Div(id = 'show_pipeline', style ={'width': '50%','borderWidth': '0px' ,'border': 'white'})],
+                                                        width = 6)], className="g-0",justify="center", style = {'font-size': '12px', 'margin' : '5px' }),
     dbc.Row([dbc.Col(
-        dbc.Jumbotron([
-           dbc.Row([ html.H1("Testing the pipeline", style ={'margin': '20px'})]), #,justify="center"
-            dbc.Row([dbc.Col([html.H4("Number of runs for hyperparameter optimization:", id = 'ml_tab_tunning')], width = 3),
+        dbc.Container([
+           dbc.Row([ html.H2("Testing the pipeline", style ={'margin': '20px'})]), #,justify="center"
+            dbc.Row([dbc.Col([html.H5("Number of runs for hyperparameter optimization (use < 10 for no optimization):", id = 'ml_tab_tunning')], width = 3),
                       dbc.Popover([ dbc.PopoverHeader("Tunning the model"),dbc.PopoverBody("here we use scikit optimize's bayesian optimization to tune the hyperparameters\
                       https://scikit-optimize.github.io/stable/auto_examples/bayesian-optimization.html")],target="ml_tab_tunning",trigger="hover",),
-                    dbc.Col([dbc.Input(id="slider_hyperopt", type="number", value = 50, min = 10, max = 1000)], width = 1)], no_gutters=True, style={'margin-bottom': '10px'}), #
-            dbc.Row([dbc.Button("Run pipeline", color="info", size = 'lg', className="mr-1", block=True, id='run_ML')]),
-            dcc.Loading(id="loading-ml",type="default", children=html.Div(id = 'ml_results', style = {'justify-content': 'center', 'margin': '0 auto', 'width': '2200', 'height' : '1400px'}),
-                                 style= {'margin-top': '-300px','justify-content': 'center'})])
-                     , width = 12,  style = {'justify-content': 'center', 'height' : '2000px'}) ], no_gutters=True)
+                    dbc.Col([dbc.Input(id="slider_hyperopt", type="number", value = 5, min = 10, max = 1000)], width = 1)], className="g-0", style={'margin-bottom': '10px'}), #
+            dbc.Row([dbc.Button("Run pipeline", color="info", size = 'lg', className="d-grid gap-2",  id='run_ML')], className = 'd-grid g-0'),
+            dcc.Loading(id="loading-ml",type="default", children=html.Div(id = 'ml_results', style = {'justify-content': 'center', 'margin': '0 auto', 'width': '1760', 'height' : '220px'}),
+                                 style= {'margin-top': '-300px','justify-content': 'center'})],className="h-100 p-5 bg-light border rounded-3 g-0", fluid = True)
+                     , width = 12,  style = {'justify-content': 'center', 'height' : '220px'}) ], className="g-0")
 ]
 
 
@@ -795,10 +696,13 @@ tab_style = {
     'text-transform': 'lowercase',
     'border': '#223c4f',
     'font-size': '12px',
-    'font-weight': 200,
+    'font-weight': 100, #200
     'align-items': 'center',
     'justify-content': 'center',
     'border-radius': '0px',
+    'height': '20px',
+    'display': 'flex',
+
     #'padding':'6px'
 }
 
@@ -807,9 +711,11 @@ tab_selected_style = {
     'color': 'white',
     'text-transform': 'uppercase',
     'font-size': '12px',
-    'font-weight': 200,
+    'font-weight': 100, #200
     'align-items': 'center',
+    'height': '20px',
     'justify-content': 'center',
+    'display': 'flex',
     #'box-shadow': '60px 0 #223c4f, -60px 0 solid #223c4f',
     'border-style': 'solid #223c4f',
     'border-color': '#223c4f',
@@ -817,9 +723,11 @@ tab_selected_style = {
     #'border-radius': '50px'
 }
 
+subtab_style = {'height': '20px','display': 'flex','font-size': '12px'}
+
 app.layout = html.Div([
     dbc.NavbarSimple([], brand = 'eDNA dashbord - Genomic Variation Laboraty UCDavis', brand_style ={'color': "white",'font-size': '14px'} ,
-                     style = { 'align-items': 'left','justify-content': 'left', 'font-size': '14px', 'height': '40px'},
+                     style = { 'align-items': 'left','justify-content': 'left', 'font-size': '14px', 'height': '32px'},
                     color = "#223c4f"),
     dcc.Store(id='all_qPCR_concat', storage_type='memory'), #storage_type='local'
     dcc.Store(id='habitatcsv', storage_type='memory'),  #df_with_umap
@@ -833,7 +741,7 @@ app.layout = html.Div([
         dcc.Tab(label='Exploratory Data Analysis', children=kep_tab, style=tab_style, selected_style=tab_selected_style),
         dcc.Tab(label='Geoposition', children=VIS, style=tab_style, selected_style=tab_selected_style),
         dcc.Tab(label='Time Series', children=time_series_tab, style=tab_style, selected_style=tab_selected_style),
-        dcc.Tab(label='Machine Learning', children=ML_tab, style=tab_style, selected_style=tab_selected_style)],className="nav nav-pills") ,
+        dcc.Tab(label='Machine Learning', children=ML_tab, style=tab_style, selected_style=tab_selected_style)]) , #,className="nav nav-pills"
         ])
 
 def get_cq_list(x, df):
@@ -849,8 +757,6 @@ def FIND_Better(row, column, df):
     if series.shape[0] == 0: return -1
     return series.iloc[0]
 cyto.load_extra_layouts()
-
-
 
 @app.callback(Output(component_id= 'Merged_df', component_property ='children'),
               Output(component_id= 'df', component_property ='data'),
@@ -870,7 +776,7 @@ def merge_csv_update_spreadsheet(hab, up_content, up_filename,  up_date , df_qpc
 
         try: df, df_hab = pd.read_json(df_qpcr_json), pd.read_json(df_hab_json)
         except Exception as e:
-            return   html.H4('no data'), html.Hr(className="my-2"), html.Div(),
+            return   html.H5('no data'), html.Hr(className="my-2"), html.Div(),
 
         describe = df.groupby('Sample').describe(include = 'all', percentiles = [])
         frequencies = pd.DataFrame(describe['Cq']['count']/describe['Fluor']['count'], columns = ['eDNA_frq']) #### this is not working properly for some reason?!
@@ -884,9 +790,9 @@ def merge_csv_update_spreadsheet(hab, up_content, up_filename,  up_date , df_qpc
         frequencies['eDNA_detection_average'] =  frequencies.list_of_detections.apply(lambda x: np.array(x).mean())
         frequencies['eDNA_binary'] = frequencies['eDNA_detection_average'].apply(lambda x: 1 if x > .1 else 0)
         frequencies = frequencies.fillna(60)
-        final = df_hab.merge(frequencies,left_on = left_merge, right_on = right_merge, how = 'inner' )
-        return  dbc.Jumbotron([ html.H1("Overview of your dataset", className="display-3"),
-                               html.Iframe(srcDoc = ProfileReport(final,  correlations=None).to_html(), height='18000', width='2350')]),  final.to_json(), html.Div() #interactions=None,
+        final = df_hab.merge(frequencies,left_on = left_merge, right_on = right_merge, how = 'inner' ) #
+        return  dbc.Container([ html.H2("Overview of your dataset", className="display-3"),
+                               html.Iframe(srcDoc = ProfileReport(final,  correlations=None,interactions=None, minimal=True).to_html(), height='900', width='1600')],className="h-100 p-5 bg-light border rounded-3 g-0", fluid = True),  final.to_json(), html.Div() #interactions=None,
     elif up_content != None and ctx == 'upload_dataset_directly':
         content_type, content_string = up_content.split(',')
         decoded = base64.b64decode(content_string)
@@ -894,21 +800,24 @@ def merge_csv_update_spreadsheet(hab, up_content, up_filename,  up_date , df_qpc
             final = pd.read_csv(io.StringIO(decoded.decode('utf-8')))
         elif '.tsv' in up_filename:
             final = pd.read_csv(io.StringIO(decoded.decode('utf-8')), sep='\t')
-        else: return html.Div('file type not accepted, is it a csv or a tsv?'),html.Div(), html.Div([  html.H5(up_filename), html.Hr() ])
-        return  [ html.Iframe(srcDoc = ProfileReport(final, correlations=None).to_html(), height='18000', width='2000')],final.to_json(), html.Div([html.H5(up_filename), html.Hr()]) #2350 interactions=None,
+        else: return html.Div('file type not accepted, is it a csv or a tsv?'),html.Div(), html.Div([  html.H6(up_filename), html.Hr() ])  #minimal=True
+        return  [ html.Iframe(srcDoc = ProfileReport(final,correlations=None,interactions=None,minimal=True).to_html(), height='900', width='1600')],final.to_json(), html.Div([html.H6(up_filename), html.Hr()]) #2350 interactions=None,
 
     else: return html.Div(),html.Div(), html.Div()
 
 
 
+classifier_list = ['LGBMClassifier', 'LGBMRegressor'] + sklearn_ensemble_list + sklearn_naive_bayes_list + sklearn_linear_model_list
 
 def inpt_children_to_pipe(columns, funcs, classif):
     C = [x['props']['value'] for x in columns[1:]]
     F = [x['props']['value'] for x in funcs[1:]]
-    if classif == 'LGBMClassifier':
-         return Pipeline(steps = [('preprocessing', make_pipe(C, F)), ('classifier', eval(classif + "(boosting_type='gbdt',  subsample=1.0)") )]) #boosting_type='gbdt', bagging_fraction = 0
-    return Pipeline(steps = [('preprocessing', make_pipe(C, F)), ('classifier', eval(classif + '()') )])
 
+    if classif == 'LGBMClassifier' or  classif == 'LGBMRegressor':
+        #classifier_function = getattr(lightgbm, classif)(boosting_type='gbdt',  subsample=1.0) #boosting_type='gbdt', bagging_fraction = 0
+        classifier_function = globals()[classif](boosting_type='gbdt',  subsample=1.0)
+    else: classifier_function = globals()[classif]()
+    return Pipeline(steps = [('preprocessing', make_pipe(C, F)), ('classifier', classifier_function)])
 
 def make_pipe(columns_list, transformer_list):
     simplfy = []
@@ -916,12 +825,12 @@ def make_pipe(columns_list, transformer_list):
         sub_smp = []
         for x in trans:
             if x[0].isupper() == True:
-                if x == 'PCA': sub_smp += [PCA(n_components = 2)]
-                else: sub_smp += [eval(x+ '()')]
+                if x in sklearn_decomposition_list: sub_smp += [globals()[x](n_components = 2)]
+                else: sub_smp += [globals()[x]()]
             else: sub_smp += [x]
         simplfy += [tuple([str(num), make_pipeline(*sub_smp), tuple(cols)])]
     return ColumnTransformer(simplfy)
-    #simplfy =[ tuple([str(num), make_pipeline(*[eval(x+ '()') if x[0].isupper() == True else x for x in trans ]), tuple(cols)]) for num, (cols, trans) in enumerate(zip(columns_list, transformer_list) )]
+    #simplfy =[ tuple([str(num), make_pipeline(*[locals()[x]() if x[0].isupper() == True else x for x in trans ]), tuple(cols)]) for num, (cols, trans) in enumerate(zip(columns_list, transformer_list) )]
     #return ColumnTransformer(simplfy)
 
 
@@ -932,41 +841,37 @@ def make_pipe(columns_list, transformer_list):
               State(component_id = 'clf_disp', component_property = 'value'),
               State(component_id = 'df', component_property = 'data'),
               State(component_id = 'ML_target', component_property = 'value'),
-             State(component_id = 'slider_hyperopt', component_property = 'value'))
+              State(component_id = 'slider_hyperopt', component_property = 'value'))
 def run_ML(clicked, f_list, c_list, val, data, target, ncalls):
     pipe = inpt_children_to_pipe(c_list,f_list, val)
+    if 'CV' in val: ncalls = 2
     try: df = pd.read_json(data,convert_dates = False)
     except: return html.Div()
     Maj = pipemaker2(df, pipe, target)
     try:
         opt_results = Maj.fast_optimize_classifier(n_calls= int(ncalls))
-        new_pipe2 = [html.Iframe(srcDoc = estimator_html_repr(Maj.optimized_pipe[0]), height='450', width='1150', hidden = 'hidden')]
+        new_pipe2 = [html.Iframe(srcDoc = estimator_html_repr(Maj.optimized_pipe[0]),height='360', width='920', hidden = 'hidden')]
     except:
         try:
             opt_results = Maj.fast_optimize_classifier(n_calls= int(ncalls), is_classifier= False)
-            new_pipe2 = [html.Iframe(srcDoc = estimator_html_repr(Maj.optimized_pipe[0]), height='450', width='1150', hidden = 'hidden')]
+            new_pipe2 = [html.Iframe(srcDoc = estimator_html_repr(Maj.optimized_pipe[0]), height='360', width='920', hidden = 'hidden')]
         except:
-            new_pipe2 = [html.Iframe(srcDoc = estimator_html_repr(Maj.Pipe()), height='450', width='1150', hidden = 'hidden')]
+            new_pipe2 = [html.Iframe(srcDoc = estimator_html_repr(Maj.Pipe()), height='360', width='920', hidden = 'hidden')]
             Maj = pipemaker2(pd.read_json(data,convert_dates = False), inpt_children_to_pipe(c_list,f_list, val), target)
     try:
         scores, fig  = Maj.Evaluate_model()
-        rev_table = pd.DataFrame(scores).T.reset_index()
+        rev_table = pd.DataFrame(scores).T.reset_index().round(3)
         graph_part = mplfig2html(fig)
-        scoreshtml = [dash_table.DataTable( data=rev_table.to_dict('records'), columns=[{'name': str(i), 'id': str(i)} for i in rev_table.columns], style_table={'overflowX': 'auto'},
-                                                      style_cell={'minWidth': '180px', 'width': '180px', 'maxWidth': '180px','overflow': 'hidden','textOverflow': 'ellipsis'}),graph_part]
+        #scoreshtml = [dash_table.DataTable( data=rev_table.to_dict('records'), columns=[{'name': str(i), 'id': str(i)} for i in rev_table.columns]),graph_part] #, style_table={'overflowX': 'auto' #style_cell={'minWidth': '180px', 'width': '180px', 'maxWidth': '180px','overflow': 'hidden','textOverflow': 'ellipsis'}
+        scoreshtml = [dcc.Graph(figure=ff.create_table(rev_table)),graph_part]
 
-
-    except: scoreshtml =  [html.H3('Failed evaluate scores: is it a regressor?', className="display-3") ]
-
-
-
-    #fplot,  fig2 = Maj.Shapley_feature_importance() #fig1,
+    except: scoreshtml =  [html.H4('Failed evaluate scores: is it a regressor?', className="display-3") ,html.H4('Failed evaluate scores: is it a regressor?', className="display-3") ]
 
     ##### shapley graphs
     if Maj.optimized_pipe[1] == 0: clf = Maj.Pipe()
     else: clf = Maj.optimized_pipe[0]
 
-    new_pipe = html.Iframe(srcDoc = estimator_html_repr(clf), height='450', width='1150', hidden = True)
+    new_pipe = html.Iframe(srcDoc = estimator_html_repr(clf), height='360', width='920', hidden = True)
     #fig, ax = plt.subplots(figsize=(15, 15))
     shap.initjs()
     dat_trans = Maj.named_preprocessor()
@@ -985,15 +890,11 @@ def run_ML(clicked, f_list, c_list, val, data, target, ncalls):
     #### force-plot
     try: a = [_force_plot_html(explainer.expected_value[i], shap_values[i], dat_trans) for i in range(len(shap_values))]
     except: a = [_force_plot_html(explainer.expected_value, shap_values, dat_trans) ]
+    #a = []
     ### dependence matrix
     try:
         ivalues = shap.TreeExplainer(clf['classifier'].fit(dat_trans, Maj.df[Maj.TG])).shap_interaction_values(dat_trans)
         figdm, axdm = plt.subplots(len( dat_trans.columns),  len(dat_trans.columns), figsize=(15, 15))
-        #d = {i: name for i,name in enumerate(dat_trans.columns)}
-        #for i in d.keys():
-        #    for j in d.keys():
-        #        shap.dependence_plot((d[i], d[j]), ivalues, dat_trans, ax = axdm[i,j], show = False)
-        #fig2html = mplfig2html(figdm)
         shap.summary_plot(ivalues, dat_trans, show= False)
         ####erase here if necessary
         figdm = plt.gcf()
@@ -1002,7 +903,7 @@ def run_ML(clicked, f_list, c_list, val, data, target, ncalls):
         figdm.tight_layout()
         fig2html = mplfig2html(figdm)
     except:
-        fig2html = html.H5("Shapley interaction matrix only available for tree-based models")
+        fig2html = html.H6("Shapley interaction matrix only available for tree-based models")
 
     #### heatmap
     try:
@@ -1013,31 +914,26 @@ def run_ML(clicked, f_list, c_list, val, data, target, ncalls):
         fig1.set_figwidth(15)
         fig1.tight_layout()
         fig1html = mplfig2html(fig1)
-        #fig1_1, ax = plt.subplots(1,1, figsize=(15, 15))
-        #shap.plots.bar(hmap(dat_trans, check_additivity=False), show = False)
-        #fig1_1 = plt.gcf()
-        #fig1_1.set_figheight(10)
-        #fig1_1.set_figwidth(10)
-        #fig1_1html = mplfig2html(fig1_1)
         heatmapfigs = [fig1html]
     except:
-        heatmapfigs = [html.H5('heatmap is only available in binary classification')]
+        heatmapfigs = [html.H6('heatmap is only available in binary classification')]
 
     if val == "LGBMClassifier" or val == 'LGBMRegressor':
         decision_tree, ax = plt.subplots(1,1, figsize=(15, 15))
+        lgbmfig = []
         plot_tree(clf['classifier'], ax=ax, show_info = ['leaf_count','data_percentage','internal_value', 'internal_weight', 'split_gain'])
         lgbmfig = [mplfig2html(decision_tree)]
     else:
         lgbmfig = []
 
-
-    figure_names = ['scores', 'roc-auc & cm', 'feature importance'] + ['force-plot feat'+ str(i) for i in range(len(a))] + ['heatmap', 'feature interaction'] + ['decision_tree' for x in lgbmfig]
-    ml_all_figures = scoreshtml+ sumhtml +a +heatmapfigs + [fig2html] + lgbmfig
-    ml_result_tabs = dcc.Tabs([dcc.Tab(children = html.Div(content, style = {'justify-content': 'center', 'margin': '0 auto', 'width': '2200px', 'height' : '1400px'}), label = name) for name,content in zip(figure_names, ml_all_figures)], style = {'justify-content': 'center', 'margin': '0 auto', 'width': '100%'})
+    figure_names =  (['scores','roc-auc & cm'] if is_classifier(globals()[val]()) else ['score'] )+ ['feature importance'] + ['force-plot feat'+ str(i) for i in range(len(a))] + ['heatmap', 'feature interaction'] + ['decision_tree' for x in lgbmfig]
+    ml_all_figures = (scoreshtml if is_classifier(globals()[val]()) else scoreshtml[:1] ) + sumhtml +a +heatmapfigs + [fig2html] + lgbmfig
+    ml_result_tabs = dcc.Tabs([dcc.Tab(children = html.Div(content, style = {'justify-content': 'center', 'margin': '0 auto', 'width': '1760px', 'height' : '1100px'}), label = name)
+                               for name,content in zip(figure_names, ml_all_figures)],
+                              style = {'justify-content': 'center', 'margin': '0 auto', 'width': '100%'})
 
     return [ml_result_tabs]+ new_pipe2
-    #return dbc.Jumbotron(scoreshtml+ sumhtml +a +heatmapfigs + [fig2html]+ new_pipe2)#+ new_pipe2 #fig1html,fig2html
-    #html.Div(id = 'ml_results', style = {'justify-content': 'center', 'margin': '0 auto', 'width': '2200px', 'height' : '1500px'}
+    #return dbc.Container(scoreshtml+ sumhtml +a +heatmapfigs + [fig2html]+ new_pipe2)#+ new_pipe2 #fig1html,fig2html
 
 @app.callback(Output(component_id= 'show_pipeline', component_property ='children'),
               Input(component_id= 'preprocessing_functions', component_property ='children'),
@@ -1049,11 +945,11 @@ def html_pipe(f_list, c_list, val, ml_children, clicked):
     ctx = dash.callback_context.triggered[0]['prop_id'].split('.')[0]
     if ctx != 'ml_results':
         pipe = inpt_children_to_pipe(c_list,f_list, val)
-        return html.Iframe(srcDoc = estimator_html_repr(pipe), height='450', width='1150',style = {'border-style':'none', 'frameborder':'none'})
+        return html.Iframe(srcDoc = estimator_html_repr(pipe),  height='360', width='920',style = {'border-style':'none', 'frameborder':'none'})
     else:
-        try: ret = ml_children[-1]['props']['srcDoc']#####['props']['children'][-1]['props']['srcDoc']
-        except: return html.Iframe(srcDoc = estimator_html_repr(inpt_children_to_pipe(c_list,f_list, val)), height='450', width='1150',  style = {'border-style':'none', 'frameborder':'none'})
-    return html.Iframe(srcDoc = ret, height='450', width='1150', style = {'border-style':'none', 'frameborder':'none'}) #1150
+        try: ret = ml_children[-1]['props']['srcDoc']
+        except: return html.Iframe(srcDoc = estimator_html_repr(inpt_children_to_pipe(c_list,f_list, val)), height='360', width='920',  style = {'border-style':'none', 'frameborder':'none'})
+    return html.Iframe(srcDoc = ret,  height='360', width='920', style = {'border-style':'none', 'frameborder':'none'}) #1150
 
 
 
@@ -1106,8 +1002,7 @@ def update_output(list_of_contents, list_of_names, list_of_dates):
                 print(e)
                 children += [html.Div(['There was an error processing this file. Is it a CSV?' ])]
 
-            children += [html.Div([  html.H5(filename), html.Hr() ]) ]
-
+            children += [html.Div([  html.H6(filename), html.Hr() ]) ]
 
         qpcr_files_concat =  pd.concat(allqpcrs).reset_index(drop = True)
         vals = [ {'label': x, 'value': x} for x in  qpcr_files_concat.columns]
@@ -1137,7 +1032,7 @@ def update_output_hab(list_of_contents, list_of_names, list_of_dates):
                 print(e)
                 children += [html.Div(['There was an error processing this file.' ])]
 
-            children += [html.Div([  html.H5(filename), html.Hr()])   ]
+            children += [html.Div([  html.H6(filename), html.Hr()])   ]
 
         vals = [ {'label': x, 'value': x} for x in  allhabs.columns]
         #merger_id = dcc.Dropdown( options=vals )#, id = 'hab_dropdown') ,  searchable=False
@@ -1193,7 +1088,7 @@ def update_UMAP_and_ML_select_columns(inpt, data): #, columns_list_id
 def generate_UMAP(clicked, cat_labels, cont_labels,y ,n_nb, radio_val,MLcolumns, MLfuncs, MLclassif, dataframe_json):
     umap_list = []
     if dataframe_json != None:
-        df = pd.read_json(dataframe_json).dropna()
+        df = pd.read_json(dataframe_json).dropna(subset = cont_labels+cat_labels)
         if y == None or y == []:
             if len(cont_labels) > 0:
                 if radio_val == 2: preprocessed_data = StandardScaler().fit_transform(df[cont_labels])
@@ -1227,36 +1122,15 @@ def generate_UMAP(clicked, cat_labels, cont_labels,y ,n_nb, radio_val,MLcolumns,
 
         #------------------------------------------------- generate graph of distances! ----------------------
         default_stylesheet_cyto = [
-        {'selector': '[degree < 15]',
-        'style': {
-            'background-color': '#223c4f',# '#223c4f',
-            'label': 'data(id)',
-            'width': "30%",
-            'height': "30%"
-        }},
-        {'selector': 'edge',
-        'style': {
-            'line-color': '#223c4f',#"mapData(weight, 0, 10, blue, red)",
-            "mid-target-arrow-color": "red",
-            "mid-target-arrow-shape": "vee"
-            # '#223c4f', line-color
-        }},
-        {'selector': '[degree >= 15]',
-        'style': {
-            'background-color': 'red',# '#223c4f', line-color
-            #'shape': 'rectangle',
-            'label': 'data(id)',
-            'width': "40%",
-            'height': "40%"
-        }}
-
-         ]
+        {'selector': '[degree < 15]','style': {'background-color': '#223c4f','label': 'data(id)','width': "30%",'height': "30%" }},
+        {'selector': 'edge','style': {'line-color': '#223c4f', "mid-target-arrow-color": "red", "mid-target-arrow-shape": "vee" }},
+        {'selector': '[degree >= 15]', 'style': {'background-color': 'red','label': 'data(id)', 'width': "40%", 'height': "40%"}}   ]
         if df.shape[0] < 200:
         #cyt = nx.cytoscape_data(cluster.minimum_spanning_tree_.to_networkx())['elements']
             cyt = nx.from_scipy_sparse_matrix(kneighbors_graph(umap_df, 2, mode = 'distance', include_self= False, n_jobs = -1), create_using=nx.DiGraph)
             #cytodisplay1 = cyto.Cytoscape(id='cytoscape', layout={'name': 'cose'},style={'width': '80%', 'height': '300px'}, elements = plotly_cyt2(cyt)) #
 
-            cytodisplay2 = cyto.Cytoscape(id='cytoscape', layout={'name': 'cose'},style={'width': '1000px', 'height': '1000px'},
+            cytodisplay2 = cyto.Cytoscape(id='cytoscape', layout={'name': 'cose'},style={'width': '1000px', 'height': '90%'},
                                           stylesheet = default_stylesheet_cyto,
                                           elements = plotly_cyt3(cyt)) #{'width': '2000px', 'height': '1000px'}
         else:
@@ -1264,7 +1138,7 @@ def generate_UMAP(clicked, cat_labels, cont_labels,y ,n_nb, radio_val,MLcolumns,
             colors_sns = pd.concat([make_colormap_clustering('hdbscan', 'tab10',0, dfscatter),
                                     make_colormap_clustering('UMAP_1', 'PiYG',1, df_colors_sns).apply(lambda x: x[:-1]),
                                     make_colormap_clustering('UMAP_2', 'PiYG',1, df_colors_sns)], axis = 1)
-            sns.clustermap(dfscatter[[x.replace(' ', '_') for x in cont_labels]], figsize=(15,15),cmap = sns.diverging_palette(20, 220, as_cmap=True), z_score = 1, cbar_pos = None, vmax = 2, vmin = -2,
+            sns.clustermap(dfscatter[[x.replace(' ', '_') for x in cont_labels]], figsize=(15,14),cmap = sns.diverging_palette(20, 220, as_cmap=True), z_score = 1, cbar_pos = None, vmax = 2, vmin = -2,
                            row_colors =colors_sns , dendrogram_ratio=(.2, .1)) #col_cluster=False
             fig1 = plt.gcf()
             fig1.tight_layout()
@@ -1434,21 +1308,15 @@ def run_fbprophet(click,data, data_umap, y_column, ds_column, regressors, rollin
 
         forecast = fbmodel.predict(pd.concat([df, future], axis = 0).reset_index())
 
-        returnable = [dcc.Graph(figure= plot_plotly(fbmodel,forecast, figsize = (1550, 1200),  xlabel=ds_column, ylabel=y_column), id = 'prophet_forecast_plot', ),
-                      dcc.Graph(figure= plot_components_plotly(fbmodel,forecast, figsize = (1550, 450)), id = 'prophet_forecast_components')]
+        returnable = [dcc.Graph(figure= plot_plotly(fbmodel,forecast, figsize = (1240, 960),  xlabel=ds_column, ylabel=y_column), id = 'prophet_forecast_plot', ),
+                      dcc.Graph(figure= plot_components_plotly(fbmodel,forecast, figsize = (1240, 340)), id = 'prophet_forecast_components')]
         if len(regressors) > 0:
             regressor_coefs = regressor_coefficients(fbmodel)
             regressor_coefs
             regressor_coefs['coef_abs'] = regressor_coefs.coef.apply(abs)
             regressor_coefs = regressor_coefs.sort_values('coef_abs', ascending = False)
             #sns.barplot(x = 'regressor', y = 'coef', data =regressor_coefs)
-            fig00 = px.bar(regressor_coefs, x="regressor", y="coef", hover_data=regressor_coefs.columns, template='plotly',height=1000, width=1550)
-            #sns.lineplot()
-            #sns.despine()
-            #fig1 = plt.gcf()
-            #fig1.set_figheight(6)
-            #fig1.set_figwidth(12)
-            #fig1.tight_layout()
+            fig00 = px.bar(regressor_coefs, x="regressor", y="coef", hover_data=regressor_coefs.columns, template='plotly',height=800, width=1240)
             returnable += [dcc.Graph(figure = fig00, id='regressor_impt')] #[mplfig2html(fig1)]
 
         returnable_tabs = dcc.Tabs([dcc.Tab(children = content, label = name) for name,content in zip(['timeline', 'components', 'regressor coeficients'], returnable)])
@@ -1471,12 +1339,23 @@ def Generate_map(data, datau, umap_selelection):
     except: pass
 
     ###--------------------------------------get better map---------------------------------------------------------
-    ret_map.config = {"mapStyle": {
-      "topLayerGroups": {},
-      "visibleLayerGroups": {  "label": True, "road": True,"building": True, "water": True, "land": True},
-      "threeDBuildingColor": [194.6103322548211,  191.81688250953655,  185.2988331038727  ]}}
+    #ret_map.config = {"mapStyle": {
+    #  "styleType": "kfo0vg",
+    #  "topLayerGroups": {},
+    #  "visibleLayerGroups": {  "label": True, "road": True,"building": True, "water": True, "land": True},
+    #  "threeDBuildingColor": [194.6103322548211,  191.81688250953655,  185.2988331038727  ],
+    #  "mapStyles": {"kfo0vg": {
+    #      "id": "kfo0vg", "label": "Chinook eDNA-marsh"}}}}
 
-    return html.Iframe(srcDoc = ret_map._repr_html_().decode(), height='1343', width='2380')#  height='1343', width='2380'
+    return html.Iframe(srcDoc = ret_map._repr_html_().decode(), height='1084', width='2000')#  height='1343', width='2380'
+
+
+app.run_server(mode='external', port = 8091, dev_tools_ui=True, debug=True,
+              dev_tools_hot_reload =True, threaded=True) #
+
+
+
+
 
 if __name__ == '__main__':
     app.run_server(mode='external', debug=True, host = '127.0.0.1', port = 8096,dev_tools_ui=True, threaded=True)
