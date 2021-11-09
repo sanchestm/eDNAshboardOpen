@@ -1,0 +1,18 @@
+Open Conda terminal and type
+```
+conda create --name eDNAsh
+conda activate eDNAsh
+pip install numpy pystan==2.19.1.1 pandas matplotlib scikit-learn seaborn shap ipywidgets hdbscan fiona==1.8.19 ipykernel umap-learn pandas-profiling
+pip install prophet lightgbm scikit-optimize dash-bootstrap-components
+pip install keplergl jupyter-dash dash-cytoscape==0.2.0 gunicorn
+```
+### Run program
+Open Conda terminal and type
+```
+conda create --name eDNAsh
+conda activate eDNAsh
+pip install numpy pystan==2.19.1.1 pandas matplotlib scikit-learn seaborn shap ipywidgets hdbscan ipykernel umap-learn pandas-profiling
+pip install prophet lightgbm scikit-optimize dash-bootstrap-components jupyter-dash dash-cytoscape==0.2.0 gunicorn
+pip install keplergl
+```
+### Run program
