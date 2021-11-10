@@ -16,7 +16,6 @@ dependencies:
   - dash-bootstrap-components
   - pandas-profiling
   - fiona
-  - ipywidgets
   - matplotlib
   - prophet
   - pandas
