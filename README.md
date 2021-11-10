@@ -3,21 +3,21 @@ free dashboard for eDNA studies
 
 
 ### Try on binder
-#### Cloud access: slower and might break with large files (504 error)
+#### Cloud access: easy but is slower and might break with large files (504 error)
 
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/sanchestm/eDNAshboardOpen/HEAD)
 1. **Click on lauch binder link**
 2. **wait until it opens jupyter notebook**
-3. **Click in the ednadashboardapp.ipynb file**
-4. **run all cells by pressing Alt+Enter twice or pressing the run button twice**
+3. **Click in the ednash_nov2021.ipynb file**
+4. **run all cells by pressing Alt+Enter 4 times or pressing the run button 4 times**
 5. **click on the link output generated**
 
 ### Installing instruction
 #### Local install: faster, can run large files
 
-1. **Download Anaconda and RapID source code**
-    1. [Dowload Ananconda](https://www.anaconda.com/products/individual) if not done before
-    2. Dowload and unzip the eDNAshboardOpen manually: click the green button writen `code` (at the top center of this page) and then click `download zip` in the dropdown options (or use git clone if experienced)
+1. **Download Anaconda and eDNAshboardOpen source code**
+    1. [Download Ananconda](https://www.anaconda.com/products/individual) if not done before
+    2. Download and unzip the eDNAshboardOpen manually: click the green button written `code` (at the top center of this page) and then click `download zip` in the dropdown options (or use git clone if experienced)
 2. **Open terminal**
     1. **In Windows** open Ananconda Navigator desktop app then click on CMD.exe Prompt
 ![screenshot](https://github.com/sanchestm/RapID-cell-counter/blob/master/images/navigator.png)
