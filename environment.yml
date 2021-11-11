@@ -10,7 +10,6 @@ dependencies:
   - jupyter-dash
   - scikit-learn
   - hdbscan
-  - ipykernel
   - lightgbm
   - shap
   - umap-learn
