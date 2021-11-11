@@ -1,24 +1,16 @@
 #!/usr/bin/python3
-from sys import argv
-import sys
-#from PyQt5 import QtCore, QtGui, uic, QtWidgets
-#from PyQt5.QtWebEngineWidgets import *
-#from PyQt5.QtCore import QUrl
-
 import numpy as np
 import pandas as pd
 from pandas.plotting import scatter_matrix
 from sklearn.base import is_classifier, is_regressor
 import matplotlib.pyplot as plt
 import matplotlib
-#matplotlib.style.use('seaborn')
 plt.rcParams["figure.figsize"] = (15,15)
 import math
 import seaborn as sns
 import shap
 from datetime import datetime
 import time
-from ipywidgets.embed import embed_minimal_html
 import umap
 from pandas_profiling import ProfileReport
 from sklearn.neighbors import kneighbors_graph
@@ -32,7 +24,6 @@ from sklearn.decomposition import DictionaryLearning,FastICA, IncrementalPCA, Ke
 from sklearn.manifold import LocallyLinearEmbedding, Isomap, MDS, SpectralEmbedding, TSNE
 from sklearn.pipeline import make_pipeline
 from sklearn.utils import estimator_html_repr
-#import sklearn
 from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer
 from sklearn.ensemble import  BaseEnsemble,RandomForestClassifier, RandomForestRegressor, RandomTreesEmbedding, ExtraTreesClassifier, ExtraTreesRegressor,\
@@ -46,42 +37,38 @@ from sklearn.linear_model import BayesianRidge, ElasticNet, ElasticNetCV, Hinge,
                              RANSACRegressor, PoissonRegressor,GammaRegressor,TweedieRegressor
 from sklearn.naive_bayes import BernoulliNB, GaussianNB, MultinomialNB,ComplementNB, CategoricalNB
 from scipy.stats import ttest_ind, ttest_1samp
-from dash_table.Format import Format, Scheme, Trim
 from  plotly.offline  import plot_mpl
 import plotly.tools as ptools
 import networkx as nx
 from prophet.plot import plot_plotly, plot_components_plotly
 import calendar
 from prophet.utilities import regressor_coefficients
-#from time import strptime
 import plotly.express as px
-from jupyter_dash import JupyterDash
-import dash_bootstrap_components as dbc
-from dash.dependencies import Input, Output# Load Data
 import base64
 import numpy as np
 import pandas as pd
 from io import StringIO
 import io
-import dash
-from dash.dependencies import Input, Output, State
-from dash import html, dcc#, dash_table
-import dash_table
-import dash_cytoscape as cyto
-from dash.exceptions import PreventUpdate
-from keplergl import KeplerGl
 import hdbscan
 import datetime
 from scipy.spatial import distance_matrix
 from sklearn.metrics.pairwise import euclidean_distances
-
+import dash_cytoscape as cyto
+import dash
+from dash.dependencies import Input, Output, State
+from dash import html, dcc, dash_table
+from dash.exceptions import PreventUpdate
+import dash_bootstrap_components as dbc
+from dash.dependencies import Input, Output# Load Data
+from dash.dash_table.Format import Format, Scheme, Trim
 from sklearn.compose import make_column_transformer
 from sklearn.pipeline import make_pipeline
 from joblib import Memory
 from shutil import rmtree
 from sklearn import svm, datasets
-from sklearn.metrics import auc,confusion_matrix,plot_confusion_matrix,classification_report
-from sklearn.metrics import plot_roc_curve
+from sklearn.metrics import auc,confusion_matrix,classification_report
+from sklearn.metrics import RocCurveDisplay,ConfusionMatrixDisplay
+#from sklearn.metrics import plot_roc_curve,plot_confusion_matrix
 from sklearn.model_selection import StratifiedKFold, KFold
 from sklearn.compose import ColumnTransformer
 from skopt import BayesSearchCV, gp_minimize, forest_minimize, gbrt_minimize
@@ -98,9 +85,11 @@ set_config(display='diagram')
 from pandas.plotting import scatter_matrix
 import matplotlib.pyplot as plt
 import matplotlib
-import ipywidgets as widget
 from sklearn.base import clone
 import plotly.figure_factory as ff
+
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.MINTY])
+server = app.server
 
 class pipemaker2:
     def __init__(self, df,ipt_pipe, target ,*, height = 'auto', width = 'auto'):
@@ -278,7 +267,7 @@ class pipemaker2:
         try:
             for i, (train, test) in enumerate(StratifiedKFold(n_splits=5, shuffle=True).split(X, y)):
                 clf.fit(X.iloc[train], y.iloc[train])
-                viz = plot_roc_curve(clf, X.iloc[test], y.iloc[test],
+                viz = RocCurveDisplay.from_estimator(clf, X.iloc[test], y.iloc[test],
                                      name='ROC fold {}'.format(i),
                                      alpha=0.3, lw=1, ax=ax[0])
                 interp_tpr = np.interp(mean_fpr, viz.fpr, viz.tpr)
@@ -306,14 +295,14 @@ class pipemaker2:
             ax[0].set(xlim=[-0.05, 1.05], ylim=[-0.05, 1.05])
             #       title="Receiver operating characteristic example")
             ax[0].legend(loc="lower right")
-        except: print('non-binary classifier')
+        except: pass#print('non-binary classifier')
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=.2)
         try:
-            plot_confusion_matrix(clf.fit(X_train, y_train), X_test, y_test,
+            ConfusionMatrixDisplay.from_estimator(clf.fit(X_train, y_train), X_test, y_test,
                                          display_labels=['negative detection', 'positive detection'],
                                          cmap=plt.cm.Blues, ax = ax[1])
             ax[1].grid(False)
-        except: print('is it a regressor?')
+        except: pass # print('is it a regressor?')
         fig.tight_layout()
         try:
             report = classification_report(clf.predict(X_test), y_test, output_dict=True) # target_names=['Negative detection', 'Positive detection']
@@ -355,7 +344,8 @@ class pipemaker2:
         for i in d.keys():
             for j in d.keys():
                 shap.dependence_plot((d[i], d[j]), ivalues[1], dat_trans, ax = axdm[i,j], show = False)
-        return (a,  figdm)
+        return (a,  figdm) #fig,
+
 
 #JupyterDash.infer_jupyter_proxy_config()
 
@@ -408,8 +398,7 @@ def mpl2plotlyGraph(figure):
     return dcc.Graph(ptools.mpl_to_plotly(figure)) #image_height: int=600,image_width: int=800
 
 # Build App
-app = JupyterDash(__name__, external_stylesheets=[dbc.themes.MINTY]) #FLATLY, LUMEN, SUPERHERO
-
+#app = JupyterDash(__name__, external_stylesheets=[dbc.themes.MINTY]) #FLATLY, LUMEN, SUPERHERO
 
 def convert2cytoscapeJSON(G):
     # load all nodes into nodes array
@@ -495,7 +484,33 @@ merge_tab = [
 ]
 
 
-VIS = [dbc.Row(dbc.Col(html.Div( id = 'keplermap', style = {'overflow': 'hidden'}), width="100%",style = {'overflow': 'clip'}), className="g-0",justify="center", style = {'overflow': 'hidden'}),]
+
+VIS=[ dbc.Row([
+           dbc.Col(
+               [dbc.Row([
+                   dbc.Container([
+                   html.H5("Choose dataset:"),
+                   dcc.Dropdown(options=[{'label':i, 'value':i} for i in ['df','df with umap','selected points of umap plot']],
+                                         value='df', multi=False, id = 'dataset_mapping',clearable=False),
+                   html.H5("latitude column:"),
+                   dcc.Dropdown(options=[],value=[], multi=False, id = 'lat_mapping',clearable=False),
+                   html.H5("longitude column:"),
+                   dcc.Dropdown(options=[],value=[], multi=False, id = 'lon_mapping',clearable=False),
+                   html.H5("time:"),
+                   dcc.Dropdown(options=[{'label':'none', 'value':'none'}],value='none',  multi=False, id = 'time_mapping', clearable=False),
+                   html.H5("colormap:"),
+                   dcc.Dropdown(options=[{'label':'none', 'value':'none'}],value='none',  multi=False, id = 'color_mapping', clearable=False),
+                   html.H5("size:"),
+                   dcc.Dropdown(options=[{'label':'none', 'value':'none'}],value='none',  multi=False, id = 'size_mapping', clearable=False),
+                   html.Hr(style= {'margin-bottom': '30px'}),
+                   dbc.Button("Run map", color="info", size = 'lg', className="d-grid gap-2", id='run_keplermap') ],className="h-100 p-5 bg-light border rounded-3 g-0 d-grid", fluid = True),
+
+               ])],width=2)  ,
+           dbc.Col([dcc.Loading(id="loading-keplermap",type="default", children= html.Div( id = 'keplermap', style = {'overflow': 'hidden'})) ], width=10, style = {'overflow': 'clip'})],  className="g-0")] #
+
+
+
+
 kep_tab=[ dbc.Row([
            dbc.Col(
                [dbc.Row([
@@ -621,7 +636,6 @@ time_series_tab = [
 
 
 ]
-
 
 sklearn_preprocessor_list = ['Binarizer','FunctionTransformer', 'KBinsDiscretizer', 'KernelCenterer', 'LabelBinarizer', 'LabelEncoder', 'MinMaxScaler',
                              'MaxAbsScaler','QuantileTransformer', 'Normalizer', 'OneHotEncoder', 'OrdinalEncoder', 'PowerTransformer', 'RobustScaler', 'SplineTransformer',
@@ -792,7 +806,7 @@ def merge_csv_update_spreadsheet(hab, up_content, up_filename,  up_date , df_qpc
         frequencies = frequencies.fillna(60)
         final = df_hab.merge(frequencies,left_on = left_merge, right_on = right_merge, how = 'inner' ) #
         return  dbc.Container([ html.H2("Overview of your dataset", className="display-3"),
-                               html.Iframe(srcDoc = ProfileReport(final,  correlations=None,interactions=None, minimal=True).to_html(), height='900', width='1600')],className="h-100 p-5 bg-light border rounded-3 g-0", fluid = True),  final.to_json(), html.Div() #interactions=None,
+                               html.Iframe(srcDoc = ProfileReport(final,  correlations=None,interactions=None).to_html(), height='900', width='1600')],className="h-100 p-5 bg-light border rounded-3 g-0", fluid = True),  final.to_json(), html.Div() #interactions=None,
     elif up_content != None and ctx == 'upload_dataset_directly':
         content_type, content_string = up_content.split(',')
         decoded = base64.b64decode(content_string)
@@ -801,7 +815,7 @@ def merge_csv_update_spreadsheet(hab, up_content, up_filename,  up_date , df_qpc
         elif '.tsv' in up_filename:
             final = pd.read_csv(io.StringIO(decoded.decode('utf-8')), sep='\t')
         else: return html.Div('file type not accepted, is it a csv or a tsv?'),html.Div(), html.Div([  html.H6(up_filename), html.Hr() ])  #minimal=True
-        return  [ html.Iframe(srcDoc = ProfileReport(final,correlations=None,interactions=None,minimal=True).to_html(), height='900', width='1600')],final.to_json(), html.Div([html.H6(up_filename), html.Hr()]) #2350 interactions=None,
+        return  [ html.Iframe(srcDoc = ProfileReport(final,correlations=None,interactions=None).to_html(), height='900', width='1600')],final.to_json(), html.Div([html.H6(up_filename), html.Hr()]) #2350 interactions=None,
 
     else: return html.Div(),html.Div(), html.Div()
 
@@ -920,9 +934,10 @@ def run_ML(clicked, f_list, c_list, val, data, target, ncalls):
 
     if val == "LGBMClassifier" or val == 'LGBMRegressor':
         decision_tree, ax = plt.subplots(1,1, figsize=(15, 15))
-        lgbmfig = []
         plot_tree(clf['classifier'], ax=ax, show_info = ['leaf_count','data_percentage','internal_value', 'internal_weight', 'split_gain'])
         lgbmfig = [mplfig2html(decision_tree)]
+        lgbmfig = []
+
     else:
         lgbmfig = []
 
@@ -1047,7 +1062,6 @@ def update_output_hab(list_of_contents, list_of_names, list_of_dates):
               Output(component_id= 'prophet_ds', component_property ='options'),  Output(component_id= 'prophet_ds', component_property ='value'),
               Output(component_id= 'prophet_regressors', component_property ='options'),  Output(component_id= 'prophet_regressors', component_property ='value'),
               Input(component_id= 'Merged_df', component_property ='children'), Input(component_id= 'df', component_property ='data'))
-              #State(component_id= 'preprocessing_columns', component_property ='children'))
 def update_UMAP_and_ML_select_columns(inpt, data): #, columns_list_id
     #if data != {'namespace': 'dash_html_components', 'props': {'children': None}, 'type': 'Div'} and data != None and inpt['type'] != 'Div':
     try:
@@ -1128,7 +1142,6 @@ def generate_UMAP(clicked, cat_labels, cont_labels,y ,n_nb, radio_val,MLcolumns,
         if df.shape[0] < 200:
         #cyt = nx.cytoscape_data(cluster.minimum_spanning_tree_.to_networkx())['elements']
             cyt = nx.from_scipy_sparse_matrix(kneighbors_graph(umap_df, 2, mode = 'distance', include_self= False, n_jobs = -1), create_using=nx.DiGraph)
-            #cytodisplay1 = cyto.Cytoscape(id='cytoscape', layout={'name': 'cose'},style={'width': '80%', 'height': '300px'}, elements = plotly_cyt2(cyt)) #
 
             cytodisplay2 = cyto.Cytoscape(id='cytoscape', layout={'name': 'cose'},style={'width': '1000px', 'height': '90%'},
                                           stylesheet = default_stylesheet_cyto,
@@ -1265,7 +1278,7 @@ def run_fbprophet(click,data, data_umap, y_column, ds_column, regressors, rollin
             df = df.rolling(window= str(int(rolling_avg *24))+'H').mean().reset_index()
             #resampled_data = fixed_dataset_time.resample('20d').mean().dropna().reset_index()
 
-        df = df[[ds_column, y_column]+ regressors]
+        df = df[[ds_column, y_column]+ regressors].dropna() ### added dropna()
         df.columns = ['ds', 'y']+ regressors
 
         season_true_kwards = {x: 25 for x in seasonality}
@@ -1325,37 +1338,103 @@ def run_fbprophet(click,data, data_umap, y_column, ds_column, regressors, rollin
 
     return html.Div()
 
-@app.callback(Output(component_id= 'keplermap', component_property ='children'),
+
+@app.callback(Output(component_id= 'dataset_mapping', component_property ='value'),
               Input(component_id= 'df', component_property ='data'),
               Input(component_id= 'df_with_umap', component_property ='data'),
               Input(component_id= 'selected_points_umap', component_property ='data'))
-def Generate_map(data, datau, umap_selelection):
-    ret_map = KeplerGl()
-    try: ret_map.add_data(data=pd.read_json(umap_selelection,convert_dates = False), name='Selected area UMAP')
-    except: pass
-    try: ret_map.add_data(data=pd.read_json(datau,convert_dates = False), name='Dataset w/ UMAP')
-    except: pass
-    try: ret_map.add_data(data=pd.read_json(data,convert_dates = False), name='Dataset')
-    except: pass
+def update_whichdf(a,b,c):
+    return 'df'
 
-    ###--------------------------------------get better map---------------------------------------------------------
-    #ret_map.config = {"mapStyle": {
-    #  "styleType": "kfo0vg",
-    #  "topLayerGroups": {},
-    #  "visibleLayerGroups": {  "label": True, "road": True,"building": True, "water": True, "land": True},
-    #  "threeDBuildingColor": [194.6103322548211,  191.81688250953655,  185.2988331038727  ],
-    #  "mapStyles": {"kfo0vg": {
-    #      "id": "kfo0vg", "label": "Chinook eDNA-marsh"}}}}
+@app.callback(Output(component_id= 'lat_mapping', component_property ='options'),
+              Output(component_id= 'lon_mapping', component_property ='options'),
+              Output(component_id= 'lat_mapping', component_property ='value'),
+              Output(component_id= 'lon_mapping', component_property ='value'),
+              Output(component_id= 'color_mapping', component_property ='options'),
+              Output(component_id= 'size_mapping', component_property ='options'),
+              Output(component_id= 'time_mapping', component_property ='options'),
+              Input(component_id= 'dataset_mapping', component_property ='value'),
+              State(component_id= 'df', component_property ='data'),
+              State(component_id= 'df_with_umap', component_property ='data'),
+              State(component_id= 'selected_points_umap', component_property ='data'))
+def update_whichdf(whichdf,data, datau, umap_selelection):
+    try:
+        if whichdf == 'df':
+            df = pd.read_json(data,convert_dates = False)
+            ret = [{'label': str(1), 'value': str(1)}]
 
-    return html.Iframe(srcDoc = ret_map._repr_html_().decode(), height='1084', width='2000')#  height='1343', width='2380'
+        elif whichdf == 'df with umap':
+            df = pd.read_json(datau,convert_dates = False)
+            ret = [{'label': str(0), 'value': str(0)}]
+
+        elif whichdf == 'selected points of umap plot':
+            df = pd.read_json(umap_selelection,convert_dates = False)
+            ret = [{'label': str(2), 'value': str(2)}]
+
+        latname = [x for x in df.columns if ('latitude' in x.lower()) ] + [x for x in df.columns if ('lat' in x.lower()) ]
+        lonname = [x for x in df.columns if ('longitude' in x.lower()) ] + [x for x in df.columns if ('lon' in x.lower()) ]
+        latname = latname[0] if len(latname)>=1 else None
+        lonname = lonname[0] if len(lonname)>=1 else None
 
 
-app.run_server(mode='external', port = 8091, dev_tools_ui=True, debug=True,
-              dev_tools_hot_reload =True, threaded=True) #
+    except: return [],[],None,None,[],[], []
+    options = [{'label': str(i), 'value': str(i)} for i in sorted(df.columns)]
+    options2 = [{'label': str(i), 'value': str(i)} for i in ['none']+sorted(df.columns) ]
+    return options,options,latname, lonname,options2,options2,options2
 
 
+@app.callback(Output(component_id= 'keplermap', component_property ='children'),
+              Input(component_id= 'run_keplermap',component_property= 'n_clicks'),
+              State(component_id= 'dataset_mapping', component_property ='value'),
+              State(component_id= 'lat_mapping', component_property ='value'),
+              State(component_id= 'lon_mapping', component_property ='value'),
+              State(component_id= 'color_mapping', component_property ='value'),
+              State(component_id= 'size_mapping', component_property ='value'),
+              State(component_id= 'time_mapping', component_property ='value'),
+              State(component_id= 'df', component_property ='data'),
+              State(component_id= 'df_with_umap', component_property ='data'),
+              State(component_id= 'selected_points_umap', component_property ='data'))
+def Generate_map(n_clicks,whichdf, lat, lon, color,size,date_column ,data, datau, umap_selelection):
+    try:
+        store_dict = {}
+        if whichdf == 'df':
+            df = pd.read_json(data,convert_dates = False)
 
+        elif whichdf == 'df with umap':
+            df = pd.read_json(datau,convert_dates = False)
 
+        elif whichdf == 'selected points of umap plot':
+            df = pd.read_json(umap_selelection,convert_dates = False)
+
+        df = df.dropna(subset = [x for x in [lat, lon, color,size,date_column] if x != 'none'])
+
+        if date_column != 'none':
+            #df[date_column] = pd.to_datetime(df[date_column])
+            store_dict['animation_frame'] = date_column
+
+        if color != 'none':
+            store_dict['color'] = color
+
+        if size != 'none':
+            store_dict['size'] = 'size'
+            try:
+                df['size'] = MinMaxScaler(feature_range=(1.5, 15)).fit_transform(df[[size]])
+            except:
+                df['size'] = make_pipeline(OrdinalEncoder(),MinMaxScaler(feature_range=(1.5, 15))).fit_transform(df[[size]])
+    except:
+        return html.Div()
+
+    try:
+        fig = px.scatter_mapbox(df, lat=lat,  lon=lon, hover_data=df.columns, zoom=10,
+                                color_continuous_scale=px.colors.sequential.Turbo ,
+                                color_discrete_sequence=px.colors.qualitative.D3,
+                                **store_dict)
+        fig.update_layout( autosize=False,width=1550,height=1100, mapbox = {'style':'carto-positron'}, )
+    except:
+        return html.H3('failed creating map')
+
+    return dcc.Graph(figure = fig, id='testtest' )#  height='1343', width='2380'
 
 if __name__ == '__main__':
-    app.run_server(mode='external', debug=True, host = '127.0.0.1', port = 8096,dev_tools_ui=True, threaded=True)
+    app.run_server(debug=True, port = 8091, dev_tools_ui=True, debug=True,
+                  dev_tools_hot_reload =True, threaded=True, host = '127.0.0.1')
