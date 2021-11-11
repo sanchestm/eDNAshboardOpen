@@ -5,6 +5,9 @@ dependencies:
   - python=3.8
   - scikit-optimize
   - numpy
+  - plotly
+  - dash
+  - jupyter-dash
   - scikit-learn
   - hdbscan
   - ipykernel
@@ -24,6 +27,5 @@ dependencies:
   - pip:
     - keplergl
     - jupyter-server-proxy
-    - jupyter-dash
     - dash-cytoscape==0.2.0
     - gunicorn
