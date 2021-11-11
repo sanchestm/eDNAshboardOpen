@@ -1436,5 +1436,4 @@ def Generate_map(n_clicks,whichdf, lat, lon, color,size,date_column ,data, datau
     return dcc.Graph(figure = fig, id='testtest' )#  height='1343', width='2380'
 
 if __name__ == '__main__':
-    app.run_server(debug=True, port = 8091, dev_tools_ui=True, debug=True,
-                  dev_tools_hot_reload =True, threaded=True, host = '127.0.0.1')
+    app.run_server(debug=True, port = 8091, dev_tools_ui=True,  dev_tools_hot_reload =True, threaded=True, host = '127.0.0.1')
